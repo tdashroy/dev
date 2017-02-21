@@ -1,1 +1,3 @@
-source ~/vimfiles/bootstrap.vim
+let s:path = expand('<sfile>:p:h')
+let s:path .= 'vimfiles/boostrap.vim'
+source &s:path
