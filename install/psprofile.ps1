@@ -1,3 +1,4 @@
 ﻿$dot = Split-Path $MyInvocation.MyCommand.Path
-". $dot\..\powershell\profile.ps1" | Out-File $profile.CurrentUserCurrentHost -Force
+$psprofile = [System.IO.Path]::GetFullPath((Join-Path $dot "..\powershell\profile.ps1"))
+". $psprofile" | Out-File $profile.CurrentUserCurrentHost -Force
 . $profile.CurrentUserCurrentHost
