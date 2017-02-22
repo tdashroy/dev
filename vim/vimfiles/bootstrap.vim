@@ -11,5 +11,5 @@ endfunction
 
 " Load all configuration modules.
 for file in split(glob(Dot('modules/*.vim')), '\n')
-	execute 'source' file
+	execute 'source ' . file
 endfor
