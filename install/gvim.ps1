@@ -8,6 +8,9 @@ $output = "$env:TEMP\$filename"
 #   Note: this requires user input, need to find a way to do silent mode.
 Start-Process $output -Wait
 
+# Delete installer
+Remove-Item $output
+
 # Install path
 #   Note: Would be great to fetch this from somewhere instead of hard coding 
 $installPath = "${env:ProgramFiles(x86)}\Vim\vim80"
