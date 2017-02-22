@@ -2,7 +2,7 @@
 call plug#begin()
 
 " Load plugin list for vim-plug to manage.
-execute 'source' Dot('plugins.vim')
+execute 'source ' . Dot('plugins.vim')
 
 " Lock in the plugin list.
 call plug#end()
