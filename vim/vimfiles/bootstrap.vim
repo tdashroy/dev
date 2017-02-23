@@ -6,7 +6,7 @@ let s:path = expand('<sfile>:p:h')
 
 " Wraps paths to make them relative to this directory.
 function! Dot(path)
-	return fnameescape(s:path) . fnameescape(a:path)
+	return fnameescape(s:path) . '/' . fnameescape(a:path)
 endfunction
 
 " Load all configuration modules.
