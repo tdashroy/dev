@@ -1,6 +1,3 @@
-" Make Vim more useful. This should always be your first configuration line.
-set nocompatible
-
 " Use this files directory as the base
 let s:path = expand('<sfile>:p:h')
 
@@ -9,7 +6,7 @@ function! Dot(path)
 	return fnameescape(s:path) . '/' . fnameescape(a:path)
 endfunction
 
-" Load all configuration modules.
-for file in split(glob(Dot('modules/*.vim')), '\n')
+" Load personal configuration
+for file in split(glob(Dot('vimfiles/gconfig/*.vim')), '\n')
 	execute 'source ' . file
 endfor

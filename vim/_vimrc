@@ -1,3 +1,18 @@
+" Make Vim more useful. This should always be your first configuration line.
+set nocompatible
+
+" Use this files directory as the base
 let s:path = expand('<sfile>:p:h')
-let s:path .= '/vimfiles/bootstrap.vim'
-execute 'source ' . fnameescape(s:path)
+
+" Wraps paths to make them relative to this directory.
+function! Dot(path)
+	return fnameescape(s:path) . '/' . fnameescape(a:path)
+endfunction
+
+" Load plugins
+execute 'source ' . Dot('vimfiles/plugins.vim')
+
+" Load personal configuration
+for file in split(glob(Dot('vimfiles/config/*.vim')), '\n')
+	execute 'source ' . file
+endfor
