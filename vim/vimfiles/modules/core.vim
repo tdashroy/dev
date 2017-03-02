@@ -13,7 +13,6 @@ if has('autocmd')
 endif
 
 " Turn on syntax highlighting
-" This is preferred to syntax on
 if has('syntax') && !exists('g:syntax_on')
 	syntax enable
 endif
@@ -21,5 +20,21 @@ endif
 " Automatically copy the indent of the current line when creating a new line
 set autoindent
 
-" backspace normally
+" Backspace normally
 set backspace=indent,eol,start
+
+" Don't scan include files when using completion.
+" Not really sure why you would want this to be honest, but
+" I found another vimrc online that suggested it was less performant
+" than scanning tags (unsure of what this is). Leaving it here until I notice I need it.
+set complete-=i
+
+" Making tab indenting smarter
+set smarttab
+
+" Don't consider numbers starting with 0 to be octal for CTRL_A (incrementing)
+set nrformats-=octal
+
+" Timeout after 100ms for key codes
+set ttimeout
+set ttimeoutlen=100

@@ -7,3 +7,6 @@ set guioptions-=T
 
 " remove right-hand scroll bar
 set guioptions-=r
+
+" remove menu bar
+set guioptions-=m
