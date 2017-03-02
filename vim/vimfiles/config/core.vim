@@ -1,4 +1,7 @@
 set encoding=utf-8
+colorscheme codedark
+
+""" sensible.vim below
 
 " filetype commands. See :help :filetype-overview
 if has('autocmd')
