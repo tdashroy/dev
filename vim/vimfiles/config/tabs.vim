@@ -1,6 +1,7 @@
 " The width of the tab character
-" Supposeduly this should be set to 8
-set tabstop=8
+" Supposeduly this should be set to 8, 
+" I'm setting it to 4 so that tabs appear as 4
+set tabstop=4
 
 " The width of an indent, e.g. with >, <, = commands
 set shiftwidth=4
