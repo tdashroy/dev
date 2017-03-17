@@ -15,6 +15,12 @@
     "$('>' * ($nestedPromptLevel + 1)) "
 }
 
+# Make powershell tab complete unix-like
+Set-PSReadlineKeyHandler -Key Tab -Function Complete
+
+# Turn off beeps
+Set-PSReadlineOption -BellStyle None
+
 # posh-git prompt settings
 $global:GitPromptSettings.BeforeText = '['
 $global:GitPromptSettings.AfterText  = '] '
