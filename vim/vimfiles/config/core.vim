@@ -41,3 +41,6 @@ set nrformats-=octal
 " Timeout after 100ms for key codes
 set ttimeout
 set ttimeoutlen=100
+
+" Turn line numbers on by default
+set nu
