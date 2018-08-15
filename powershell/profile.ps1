@@ -6,6 +6,8 @@
 . $dot\functions\colors.ps1
 . $dot\functions\cd.ps1
 . $dot\aliases\cd.ps1
+. $dot\functions\git.ps1
+. $dot\aliases\git.ps1
 
 # Local powershell profile, for machine specific settings
 $lprofile = "$dot\lprofile.ps1"
