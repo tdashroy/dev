@@ -1,6 +1,6 @@
 ﻿$dot = Split-Path $MyInvocation.MyCommand.Path
 
-. $dot\console\colors.ps1
+# . $dot\console\colors.ps1
 . $dot\modules\posh-git.ps1
 . $dot\console\prompt.ps1
 . $dot\functions\colors.ps1
