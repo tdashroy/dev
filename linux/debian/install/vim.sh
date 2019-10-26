@@ -10,4 +10,4 @@ echo "***** Installing vim profile... *****"
 vim_profile="$git_dir/vim/profile.vim"
 vimrc="$HOME/.vimrc"
 echo "so $vim_profile" > $vimrc
-echo "***** Done installing vim profile... *****"
+echo "***** Done installing vim profile. *****"
