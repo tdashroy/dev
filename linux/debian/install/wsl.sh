@@ -1,6 +1,7 @@
 #!/bin/bash
 git_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../../" >/dev/null 2>&1 && pwd )"
 
+# commented out b/c it makes it impossible to work with windows apps
 #echo "***** Setting up WSL mount options... *****"
 #wsl_conf="$git_dir/linux/debian/install/wsl.conf"
 #cat "$wsl_conf" | sudo tee "/etc/wsl.conf" >/dev/null
