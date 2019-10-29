@@ -2,3 +2,5 @@
 $DefaultUser = [System.Environment]::UserName
 
 Set-Theme "$git_dir\windows\powershell\themes\OneHalfDarkParadox.psm1"
+
+Export-ModuleMember -Function * -Variable * -Alias *

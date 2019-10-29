@@ -13,7 +13,11 @@ git config --global core.autocrlf true
 git config --global mergetool.keepBackup false
 
 # Install posh-git for nicer powershell git integration
+Write-Host "Installing posh-git..."
 PowerShellGet\Install-Module posh-git -Scope CurrentUser -AllowClobber
+Write-Host "Done installing posh-git."
 
 # Install oh-my-posh for theming of the powershell prompt
+Write-Host "Installing oh-my-posh..."
 PowerShellGet\Install-Module oh-my-posh -Scope CurrentUser -AllowClobber
+Write-Host "Done installing oh-my-posh."
