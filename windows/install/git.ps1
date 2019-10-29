@@ -17,6 +17,3 @@ PowerShellGet\Install-Module posh-git -Scope CurrentUser -AllowClobber
 
 # Install oh-my-posh for theming of the powershell prompt
 PowerShellGet\Install-Module oh-my-posh -Scope CurrentUser -AllowClobber
-
-# Set oh-my-posh theme to Paradox
-Set-Theme Paradox
