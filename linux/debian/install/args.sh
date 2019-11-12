@@ -21,23 +21,24 @@ done
 
 set -- "${args[@]}"
 
-# parse options
+# parse default options
 args=()
 end_of_opt=
 while [[ $# -gt 0 ]] ; do
     arg="$1"; shift
     case "${end_of_opt}${arg}" in
         --) args+=("$arg"); end_of_opt=1 ;;
-        -o|--overwrite) overwrite=true ;;
-        -p|--prompt) prompt=true ;;
-        -u|--user_input) user_input="$1"
-            case $user_input in
-                none) shift ;;
+        -a|--ask) g_ask=true ;;
+        -o|--overwrite) g_overwrite=true ;;
+        -u|--user_input) g_user_input="$1"
+            case $g_user_input in
                 new) shift ;;
                 overwrite) shift ;;
-                *) echo "bad argument for -u|--user_input option: $user_input. Should be one of: none, new, or overwrite." >&2; exit 1;;
+                skip) shift ;;
+                *) echo "bad argument for -u|--user_input option: $g_user_input. Should be one of: new, overwrite, or skip." >&2; exit 1;;
             esac
             ;;
+        -v|--verbose) g_verbose=true ;;
 
         *) args+=("$arg") ;;
     esac
@@ -46,6 +47,7 @@ done
 set -- "${args[@]}"
 
 # defaults
-[[ -z "$overwrite" ]] && overwrite=false
-[[ -z "$prompt" ]] && prompt=false
-[[ -z "$user_input" ]] && user_input='new'
+[[ -z "$g_ask" ]] && g_ask=false
+[[ -z "$g_overwrite" ]] && g_overwrite=false
+[[ -z "$g_user_input" ]] && g_user_input='new'
+[[ -z "$g_verbose" ]] && g_verbose='new'
