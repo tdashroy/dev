@@ -12,7 +12,7 @@ install() {
     user_input="$g_user_input"
     user_input_required=false
     install_string='install zsh'
-    overwrite_string=''
+    overwrite_string=
     exists_cmd() { which zsh &> /dev/null; }
     install_cmd() { 
         packages="zsh"
@@ -20,69 +20,103 @@ install() {
     }
     run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
 
-    # # oh-my-zsh install
+    # oh-my-zsh install
     omz_dir="$HOME/.oh-my-zsh"
     ask="$g_ask"
     overwrite=false
     user_input="$g_user_input"
     user_input_required=false
     install_string='install oh-my-zsh'
-    overwrite_string=''
+    overwrite_string=
     exists_cmd() { [[ -d "$omz_dir" ]]; }
     install_cmd() { sh -c "$(wget -O- https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh) --unattended"; }
     run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
 
-    # # install powerlevel10k
-    # p10k_dir="$omz_dir/custom/themes/powerlevel10k"
-    # if [ ! -d "$p10k_dir" ] ; then 
-    #     echo "Installing powerlevel10k..."
-    #     git clone https://github.com/romkatv/powerlevel10k.git "$p10k_dir"
-    #     needs_restart=true
-    # fi
+    # install powerlevel10k
+    p10k_dir="$omz_dir/custom/themes/powerlevel10k"
+    ask="$g_ask"
+    overwrite=false
+    user_input="$g_user_input"
+    user_input_required=false
+    install_string='install powerlevel10k'
+    overwrite_string=
+    exists_cmd() { [[ -d "$p10k_dir" ]]; }
+    install_cmd() { git clone https://github.com/romkatv/powerlevel10k.git "$p10k_dir"; }
+    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
 
-    # # set powerlevel10k as the ZSH_THEME
-    # if ! grep 'ZSH_THEME="powerlevel10k\/powerlevel10k"' "$HOME/.zshrc" &> /dev/null ; then
-    #     echo "Setting default theme to powerlevel10k..."
-    #     sed -i 's/ZSH_THEME="[^"]*"/ZSH_THEME="powerlevel10k\/powerlevel10k"/g' "$HOME/.zshrc"
-    #     needs_restart=true
-    # fi
+    # set powerlevel10k as the ZSH_THEME
+    omz_theme=sed -n $'s/^ZSH_THEME=[\'"]\\(.\\+\\)[\'"]$/\\1/p' "$HOME/.zshrc"
+    ask="$g_ask"
+    overwrite="$g_overwrite"
+    user_input="$g_user_input"
+    user_input_required=false
+    install_string="set zsh theme to powerlevel10k"
+    overwrite_string="overwrite zsh theme from $omz_theme to powerlevel10k"
+    exists_cmd() { [[ "$omz_theme" = 'powerlevel10k/powerlevel10k' ]]; }
+    install_cmd() { sed -i 's/\(^ZSH_THEME=\).\+$/\1"powerlevel10k\/powerlevel10k"/' "$HOME/.zshrc"; }
+    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
 
-    # # create ~/.p10k.sh file if it doesn't exist
-    # p10k_sh="$HOME/.p10k.sh"
-    # if [ ! -f "$p10k_sh" ] ; then
-    #     echo "Creating p10k_sh file..."
-        
-    # elif 
-    # fi
+    # install custom powerlevel10k profile
+    git_p10k_profile="$git_dir/linux/debian/p10k.zsh"
+    ask="$g_ask"
+    overwrite="$g_overwrite"
+    user_input="$g_user_input"
+    user_input_required=false
+    install_string="install custom powerlevel10k profile"
+    overwrite_string="overwrite current powerlevel10k profile"
+    exists_cmd() { [[ -f "$HOME/.p10k.zsh" ]] ; }
+    install_cmd() {
+        p10k_profile_string="source '$git_p10k_profile'"
+        if exists_cmd ; then
+            backup_p10k="$HOME/.p10k_$(date +%Y%m%d%H%M%S).zsh"
+            cp "$HOME/.p10k.zsh" "$backup_p10k"
+            # copy failed, don't overwrite
+            if [[ "$?" != 0 ]] ; then
+                false; return
+            fi
+            newline=$'\n' # lol i legit don't know a better way to do this
+            p10k_profile_string="# previous .p10k.zsh profile backed up to ${backup_p10k}${newline}${p10k_profile_string}"
+        fi
+        echo "$p10k_profile_string" > "$HOME/.p10k.zsh"
+    }
+    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd' && needs_restart=true
 
-    # # ask if ~/.p10k.sh should be replaced
+    # set up powerlevel10k config
+    ask="$g_ask"
+    overwrite=false
+    user_input="$g_user_input"
+    user_input_required=false
+    install_string="use custom powerlevel10k profile"
+    overwrite_string=
+    exists_cmd() { grep '[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh' "$HOME/.zshrc" &> /dev/null ; }
+    install_cmd() {
+        echo '# To customize prompt, run p10k configure`  or edit ~/.p10k.zsh.' >> "$HOME/.zshrc"
+        echo '[[ ! -f $HOME/.p10k.zsh ]] || source $HOME/.p10k.zsh' >> "$HOME/.zshrc"
+    }
+    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd' && needs_restart=true
 
-
-    # # set up powerlevel10k config
-    # if ! grep '[[ ! -f $HOME/.p10k.zsh ]] || source $HOME/.p10k.zsh' "$HOME/.zshrc" &> /dev/null ; then
-    #     echo "Setting up powerlevel10k config..."
-    #     echo '# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.' >> "$HOME/.zshrc"
-    #     echo '[[ ! -f $HOME/.p10k.zsh ]] || source $HOME/.p10k.zsh' >> "$HOME/.zshrc"
-    #     needs_restart=true
-    # fi
-
-    # # add custom zsh profile
-    # zsh_profile="$git_dir/linux/debian/zsh_profile.sh"
-    # if ! grep "source \"$zsh_profile\"" "$HOME/.zshrc" &> /dev/null ; then
-    #     echo "Installing custom zsh options..."
-    #     echo "source \"$zsh_profile\"" >> "$HOME/.zshrc"
-    #     needs_restart=true
-    # fi
+    # add custom zsh profile
+    git_zsh_profile="$git_dir/linux/debian/zsh_profile.sh"
+    ask="$g_ask"
+    overwrite=false
+    user_input="$g_user_input"
+    user_input_required=false
+    install_string="install custom zsh profile found at $git_zsh_profile"
+    overwrite_string=
+    exists_cmd() { grep "source '$git_zsh_profile'" "$HOME/.zshrc"; }
+    install_cmd() { echo "source '$git_zsh_profile'" >> "$HOME/.zshrc"; }
+    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd' && needs_restart=true
     
     # set default shell to zsh
+    zsh_shell="$(which zsh)"
     ask="$g_ask"
     overwrite=false
     user_input="$g_user_input"
     user_input_required=false
     install_string='set the default shell to zsh'
     overwrite_string=''
-    exists_cmd() { [[ "$(echo "$SHELL")" = "$(which zsh)" ]]; }
-    install_cmd() { chsh -s "$(which zsh)"; }
+    exists_cmd() { [[ "$(echo "$SHELL")" = "$zsh_shell" ]]; }
+    install_cmd() { chsh -s "$zsh_shell"; }
     run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd' && needs_restart=true
 
     if [ "$needs_restart" = true ]; then
