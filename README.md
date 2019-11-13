@@ -4,14 +4,24 @@ Install order for WSL:
 1. Install "windows/Cascadia Code Nerd Font Complete.ttf"
 1. Install debian WSL
 1. Install Windows Terminal from Microsoft Store
-1. Install VS Code (optional)
+1. VS Code (optional)
+  1. Download and install VS Code
+  1. Add "CascadiaCode Nerd Font" to VS Code Font Families
+  1. Install "One Dark Pro" theme from marketplace
 1. Open Windows Terminal
   1. Hit ctrl+, to open settings. Change all the profiles to have the "colorScheme": "One Half Dark" and "fontFace": "CascadiaCode Nerd Font"
-  1. Open powershell tab and run "windows/install/install.ps1"
-  1. Open debian tab and run "linux/debian/install/install.sh"
+  1. In powershell tab, run "windows/install/install.ps1"
+  1. In debian tab, run "linux/debian/install/install.sh"
+  1. In debian tab, run "linux/debian/install/wsl.sh"
 
 # todo
-1. Install for Windows Terminal profile
-1. Install for Git for Windows
-1. Modify oh-my-posh prompt to remove device name
-1. Modify oh-my-zsh prompt to remove device name, put commands on new line, add more descriptive git markers, add timestamp
+1. Install scripts for manual install/setup
+  1. Git for Windows
+  1. Fonts
+  1. Windows Terminal
+    1. App install
+    1. Profile setup
+  1. VS Code
+    1. App install
+    1. Profile setup
+1. Modify oh-my-posh and oh-my-zsh/powerlevel10k prompts to match
