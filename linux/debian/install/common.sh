@@ -34,7 +34,7 @@ run_install_task() {
     fi
 
     echo "Running task to ${task_string}..."
-    if eval "$install_cmd" ; then
+    if ! eval "$install_cmd" ; then
         echo "Failed to ${task_string}."
         false; return
     fi
