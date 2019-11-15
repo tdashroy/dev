@@ -3,8 +3,11 @@ git_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../../" >/dev/null 2>&1 && p
 source "$git_dir/linux/debian/install/common.sh"
 source "$git_dir/linux/debian/install/args.sh"
 
+# returns
+#   0 - install requires restart
+#   2 - no installs requiring restart
 install() {
-    needs_restart=false
+    exit_code=2
 
     # #zsh install
     ask="$g_ask"
@@ -20,34 +23,10 @@ install() {
     }
     run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
 
-    if ! exists_cmd ; then
-        echo "Couldn't install zsh, skipping the rest of the zsh setup."
-        return
+    if [[ "$?" = 1 ]] ; then
+        echo "Skipping the rest of the zsh setup."
+        return $exit_code
     fi
-
-    # add custom zsh profile
-    git_zsh_profile="$git_dir/linux/debian/profile.zsh"
-    ask="$g_ask"
-    overwrite=false
-    user_input="$g_user_input"
-    user_input_required=false
-    install_string="install custom zsh profile"
-    overwrite_string=
-    exists_cmd() { grep "source '$git_zsh_profile'" "$HOME/.zshrc" &> /dev/null; }
-    install_cmd() { echo "source '$git_zsh_profile'" >> "$HOME/.zshrc"; }
-    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd' && needs_restart=true
-    
-    # set default shell to zsh
-    zsh_shell="$(which zsh)"
-    ask="$g_ask"
-    overwrite=false
-    user_input="$g_user_input"
-    user_input_required=false
-    install_string='set the default shell to zsh'
-    overwrite_string=''
-    exists_cmd() { [[ "$(echo "$SHELL")" = "$zsh_shell" ]]; }
-    install_cmd() { chsh -s "$zsh_shell"; }
-    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd' && needs_restart=true
 
     # oh-my-zsh install
     omz_dir="$HOME/.oh-my-zsh"
@@ -61,9 +40,9 @@ install() {
     install_cmd() { sh -c "$(wget -O- https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh) --unattended"; }
     run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
 
-    if ! exists_cmd ; then
-        echo "Couldn't install oh-my-zsh, skipping the rest of the zsh setup."
-        return
+    if [[ "$?" = 1 ]] ; then
+        echo "Skipping the rest of the zsh setup."
+        return $exit_code
     fi
 
     # install powerlevel10k
@@ -78,9 +57,9 @@ install() {
     install_cmd() { git clone https://github.com/romkatv/powerlevel10k.git "$p10k_dir"; }
     run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
 
-    if ! exists_cmd ; then
-        echo "Couldn't install powerlevel10k, skipping the rest of the zsh setup."
-        return
+    if [[ "$?" = 1 ]] ; then
+        echo "Skipping the rest of the zsh setup."
+        return $exit_code
     fi
 
     # set powerlevel10k as the ZSH_THEME
@@ -94,6 +73,11 @@ install() {
     exists_cmd() { [[ "$omz_theme" = 'powerlevel10k/powerlevel10k' ]]; }
     install_cmd() { sed -i 's/\(^ZSH_THEME=\).\+$/\1"powerlevel10k\/powerlevel10k"/' "$HOME/.zshrc"; }
     run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
+
+    if [[ "$?" = 1 ]] ; then
+        echo "Skipping the rest of the zsh setup."
+        return $exit_code
+    fi
 
     # install custom powerlevel10k profile
     git_p10k_profile="$git_dir/linux/debian/p10k.zsh"
@@ -118,7 +102,14 @@ install() {
         p10k_profile_lines+=("source '$git_p10k_profile'")
         printf "%s\n" "${p10k_profile_lines[@]}" > "$HOME/.p10k.zsh"
     }
-    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd' && needs_restart=true
+    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
+
+    if [[ "$?" = 1 ]] ; then
+        echo "Skipping the rest of the zsh setup."
+        return $exit_code
+    elif [[ "$?" = 0 ]] ; then
+        exit_code=0
+    fi
 
     # set up powerlevel10k config
     ask="$g_ask"
@@ -133,11 +124,59 @@ install() {
         echo '# To customize prompt, run `p10k configure`  or edit ~/.p10k.zsh.' >> "$HOME/.zshrc"
         echo '[[ ! -f $HOME/.p10k.zsh ]] || source $HOME/.p10k.zsh' >> "$HOME/.zshrc"
     }
-    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd' && needs_restart=true
+    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
 
-    if [ "$needs_restart" = true ]; then
-        echo "***** NOTE: Restart terminal when install is completely finished for zsh *****"
+    if [[ "$?" = 1 ]] ; then
+        echo "Skipping the rest of the zsh setup."
+        return $exit_code
+    elif [[ "$?" = 0 ]] ; then
+        exit_code=0
     fi
+
+    # add custom zsh profile
+    git_zsh_profile="$git_dir/linux/debian/profile.zsh"
+    ask="$g_ask"
+    overwrite=false
+    user_input="$g_user_input"
+    user_input_required=false
+    install_string="install custom zsh profile"
+    overwrite_string=
+    exists_cmd() { grep "source '$git_zsh_profile'" "$HOME/.zshrc" &> /dev/null; }
+    install_cmd() { echo "source '$git_zsh_profile'" >> "$HOME/.zshrc"; }
+    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
+
+    if [[ "$?" = 1 ]] ; then
+        echo "Skipping the rest of the zsh setup."
+        return $exit_code
+    elif [[ "$?" = 0 ]] ; then
+        exit_code=0
+    fi
+
+    # set default shell to zsh
+    # intentionally last, only want to use zsh if everything was set up properly
+    zsh_shell="$(which zsh)"
+    ask="$g_ask"
+    overwrite=false
+    user_input="$g_user_input"
+    user_input_required=false
+    install_string='set the default shell to zsh'
+    overwrite_string=''
+    exists_cmd() { [[ "$(echo "$SHELL")" = "$zsh_shell" ]]; }
+    install_cmd() { chsh -s "$zsh_shell"; }
+    run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
+
+    if [[ "$?" = 1 ]] ; then
+        echo "Skipping the rest of the zsh setup."
+        return $exit_code
+    elif [[ "$?" = 0 ]] ; then
+        exit_code=0
+    fi
+
+    return $exit_code
 }
 
 install
+
+if [[ "$?" = 0 ]] ; then
+    echo "***** NOTE: Restart shell when install is completely finished to use zsh *****"
+fi

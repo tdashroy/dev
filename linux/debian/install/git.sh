@@ -18,7 +18,7 @@ install() {
     }
     run_install_task "$ask" "$overwrite" "$user_input" "$user_input_required" "$install_string" "$overwrite_string" 'exists_cmd' 'install_cmd'
 
-    if ! exists_cmd ; then
+    if [[ "$?" = 1 ]] ; then
         echo "Couldn't install git, skipping the rest of the git configuration."
         return
     fi 

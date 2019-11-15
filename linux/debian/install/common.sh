@@ -2,7 +2,12 @@
 
 ### variables ###
 
+# variable telling whether or not the version of linux being used is a Windows Subystem for Linux
 is_wsl="$( { uname -r ; cat /proc/version ; cat /proc/sys/kernel/osrelease ; } | grep 'Microsoft' &> /dev/null ; echo "$?")"
+
+# errors
+success=0
+failure=1
 
 
 ### functions ###
@@ -29,6 +34,11 @@ is_wsl="$( { uname -r ; cat /proc/version ; cat /proc/sys/kernel/osrelease ; } |
 #   exists_cmd - command to run to tell whether or not what is being installed is already installed. 
 #                a successful return code will affect the outcome of the function based on the options above
 #   install_cmd - command to run to perform the install for this task
+#
+# returns
+#   0 - successful install
+#   1 - attempted install that failed
+#   2 - no attempted install
 run_install_task() {
     local ask=$1
     local overwrite=$2
@@ -40,14 +50,14 @@ run_install_task() {
     local install_cmd=$8
 
     if [[ "$user_input_required" = true && "$user_input" = 'none' ]] ; then
-        false; return
+        return 2
     fi
 
     local task_string="$install_string"
     local exists=false
     if eval "$exists_cmd" ; then
         if [[ "$overwrite" != true || ("$user_input_required" = true && "$user_input" != 'all') ]] ; then
-            false; return
+            return 2
         fi
         task_string="$overwrite_string"
         exists=true
@@ -58,7 +68,7 @@ run_install_task() {
             read -p "Would you like to ${task_string}? [y/n] " reply
             case $reply in
                 [Yy]* ) break;;
-                [Nn]* ) false; return; break;;
+                [Nn]* ) return 2; break;;
             esac
         done
     fi
@@ -66,10 +76,10 @@ run_install_task() {
     echo "Running task to ${task_string}..."
     if ! eval "$install_cmd" ; then
         echo "Failed to ${task_string}."
-        false; return
+        return 1
     fi
 
-    true; return
+    return 0
 }
 
 # stolen from https://stackoverflow.com/a/17841619/500167
