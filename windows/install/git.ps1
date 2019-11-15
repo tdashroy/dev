@@ -7,7 +7,10 @@
 }
 
 # Make line endings checkout Windows-style and commit Unix-style
-git config --global core.autocrlf true
+# git config --global core.autocrlf true
+
+# standardize on LF for checkout and commit
+git config --global core.autocrlf input
 
 # Turn off .orig files after resolving conflicts with git mergetool
 git config --global mergetool.keepBackup false
