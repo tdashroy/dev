@@ -61,6 +61,7 @@ omz_install() {
 
 # install powerlevel10k
 p10k_install() {
+    local omz_dir="$HOME/.oh-my-zsh"
     local p10k_dir="$omz_dir/custom/themes/powerlevel10k"
 
     local setup_type="$g_setup_type"
