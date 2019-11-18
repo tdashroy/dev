@@ -1,7 +1,7 @@
 #!/bin/bash
 git_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../../" >/dev/null 2>&1 && pwd )"
-source "$git_dir/linux/debian/install/common.sh"
-source "$git_dir/linux/debian/install/args.sh"
+source "$git_dir/linux/debian/setup/common.sh"
+source "$git_dir/linux/debian/setup/args.sh"
 
 echo "***** Installing vim... *****"
 packages="vim"
