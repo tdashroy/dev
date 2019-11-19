@@ -1,9 +1,9 @@
 # dev
 Install order for WSL:
 1. Git for Windows
-1. Install "windows/Cascadia Code Nerd Font Complete.ttf"
-1. Install debian WSL
-1. Install Windows Terminal from Microsoft Store
+1. ./Delugia.Nerd.Font.Complete.ttf (courtesy of https://github.com/adam7/delugia-code/releases)
+1. Debian WSL
+1. Windows Terminal from Microsoft Store
 1. VS Code (optional)
   1. Download and install VS Code
   1. Add "CascadiaCode Nerd Font" to VS Code Font Families
