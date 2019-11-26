@@ -18,7 +18,6 @@ git_install() {
     exists_cmd() { which git &> /dev/null; }
     install_cmd() { echo "$packages" | xargs sudo apt-get -y install; }
     uninstall_cmd() { echo "$packages" | xargs sudo apt-get --auto-remove -y purge; }
-    # uninstall_cmd() { echo "Success!"; }
     run_setup_task "$setup_type" "$ask" "$overwrite" "$input" "$input_required" "$install_string" "$overwrite_string" "$uninstall_string" 'exists_cmd' 'install_cmd' 'uninstall_cmd'
     local ret=$?
 
@@ -35,7 +34,7 @@ git_autocrlf() {
 
     local setup_type="$g_setup_type"
     local ask="$g_ask"
-    local overwrite=false
+    local overwrite="$g_overwrite"
     local input="$g_input"
     local input_required=false
     local install_string='set git autocrlf to input'
@@ -128,7 +127,7 @@ git_credential_helper() {
 
     local ask="$g_ask"
     local setup_type="$g_setup_type"
-    local overwrite=false
+    local overwrite="$g_overwrite"
     local input="$g_input"
     local input_required=false
     local install_string='set git credential helper to use Windows Credential Manager'
@@ -160,6 +159,12 @@ install() {
     git_user_name
     git_user_email
     git_credential_helper
+
+    local ret=$?
+    if [[ $ret != 1 ]] ; then
+        ret=0
+    fi
+    return $ret
 }
 
 uninstall() {
@@ -168,6 +173,12 @@ uninstall() {
     git_user_name
     git_autocrlf
     git_install
+    
+    local ret=$?
+    if [[ $ret != 1 ]] ; then
+        ret=0
+    fi
+    return $ret
 }
 
 eval "$g_setup_type"
