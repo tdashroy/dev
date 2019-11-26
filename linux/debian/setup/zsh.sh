@@ -251,61 +251,61 @@ zsh_shell() {
 #   1 - failed install
 #   2 - no installs requiring restart
 install() {
-    local exit_code=2
-
+    local ret=2
+    
     zsh_install
 
     if [[ $? == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
-        return $exit_code
+        return 1
     fi
 
     omz_install
 
     if [[ $? == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
-        return $exit_code
+        return 1
     fi
 
     p10k_install
 
-    if [[ "$?" == 1 ]] ; then
+    if [[ $? == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
-        return $exit_code
+        return 1
     fi
 
     p10k_theme
 
-    if [[ "$?" == 1 ]] ; then
+    if [[ $? == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
-        return $exit_code
+        return 1
     fi
 
     p10k_profile
 
-    if [[ "$?" == 1 ]] ; then
+    if [[ $? == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
-        return $exit_code
-    elif [[ "$?" == 0 ]] ; then
-        exit_code=0
+        return 1
+    elif [[ $? == 0 ]] ; then
+        ret=0
     fi
 
     p10k_config
 
-    if [[ "$?" == 1 ]] ; then
+    if [[ $? == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
-        return $exit_code
-    elif [[ "$?" == 0 ]] ; then
-        exit_code=0
+        return 1
+    elif [[ $? == 0 ]] ; then
+        ret=0
     fi
 
     zsh_profile
 
-    if [[ "$?" == 1 ]] ; then
+    if [[ $? == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
-        return $exit_code
-    elif [[ "$?" == 0 ]] ; then
-        exit_code=0
+        return 1
+    elif [[ $? == 0 ]] ; then
+        ret=0
     fi
 
     # intentionally last, only want to use zsh if everything was set up properly
@@ -313,12 +313,12 @@ install() {
 
     if [[ "$?" == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
-        return $exit_code
+        return 1
     elif [[ "$?" == 0 ]] ; then
-        exit_code=0
+        ret=0
     fi
 
-    return $exit_code
+    return $ret
 }
 
 # returns
@@ -326,36 +326,36 @@ install() {
 #   1 - failed uninstall
 #   2 - no uninstalls requiring restart
 uninstall() {
-    local exit_code=2
+    local ret=2
 
     zsh_shell
 
-    if [[ $? = 0 ]] ; then
-        exit_code=0
+    if [[ $? == 0 ]] ; then
+        ret=0
     fi
 
     zsh_profile
 
-    if [[ $? = 0 ]] ; then
-        exit_code=0
+    if [[ $? == 0 ]] ; then
+        ret=0
     fi
 
     p10k_config
 
-    if [[ $? = 0 ]] ; then
-        exit_code=0
+    if [[ $? == 0 ]] ; then
+        ret=0
     fi
 
     p10k_profile
 
-    if [[ $? = 0 ]] ; then
-        exit_code=0
+    if [[ $? == 0 ]] ; then
+        ret=0
     fi
 
     p10k_theme
 
-    if [[ $? = 0 ]] ; then
-        exit_code=0
+    if [[ $? == 0 ]] ; then
+        ret=0
     fi
 
     p10k_install
