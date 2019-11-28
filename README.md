@@ -1,7 +1,7 @@
 # dev
 Install order for WSL:
-1. Git for Windows
-1. ./Delugia.Nerd.Font.Complete.ttf (courtesy of https://github.com/adam7/delugia-code/releases)
+1. Git for Windows (https://git-scm.com/download/win)
+1. Double click ./Delugia.Nerd.Font.Complete.ttf (courtesy of https://github.com/adam7/delugia-code/releases)
 1. Debian WSL
 1. Windows Terminal from Microsoft Store
 1. VS Code (optional)
