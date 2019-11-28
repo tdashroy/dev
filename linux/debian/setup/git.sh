@@ -147,34 +147,71 @@ git_credential_helper() {
     return $ret
 }
 
+# returns
+#   0 - all success
+#   1 - at least one failure
 install() {
+    local last=
+    local ret=
+
     git_install
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
     
-    if [[ $? == 1 ]] ; then
+    if [[ $last == 1 ]] ; then
         echo "Couldn't install git, skipping the rest of the git configuration."
         return 1
     fi 
 
     git_autocrlf
-    git_user_name
-    git_user_email
-    git_credential_helper
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
 
-    local ret=$?
+    git_user_name
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+
+    git_user_email
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+
+    git_credential_helper
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    
     if [[ $ret != 1 ]] ; then
         ret=0
     fi
     return $ret
 }
 
+# returns
+#   0 - all success
+#   1 - at least one failure
 uninstall() {
-    git_credential_helper
-    git_user_email
-    git_user_name
-    git_autocrlf
-    git_install
+    local last=
+    local ret=
     
-    local ret=$?
+    git_credential_helper
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    
+    git_user_email
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    
+    git_user_name
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    
+    git_autocrlf
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    
+    git_install
+    last=$?
+    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    
     if [[ $ret != 1 ]] ; then
         ret=0
     fi

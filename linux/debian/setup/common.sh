@@ -50,14 +50,14 @@ if $common_first_run ; then
         local exists_cmd="$7"
         local install_cmd="$8"
 
-        if [[ "$input_required" == true && "$input" = 'none' ]] ; then
+        if [[ "$input_required" == true && "$input" == 'none' ]] ; then
             return 2
         fi
 
         local task_string="$install_string"
         local exists=false
         if eval "$exists_cmd" ; then
-            if [[ "$overwrite" != true || ("$input_required" = true && "$input" != 'all') ]] ; then
+            if [[ "$overwrite" != true || ("$input_required" == true && "$input" != 'all') ]] ; then
                 return 2
             fi
             task_string="$overwrite_string"
@@ -90,10 +90,11 @@ if $common_first_run ; then
         local uninstall_cmd="$4"
 
         if ! eval "$exists_cmd" ; then
+            echo "Skipping task to ${uninstall_string}."
             return 2
         fi
 
-        if [[ "$ask" == 'always' || "$ask" = 'overwrite' ]] ; then
+        if [[ "$ask" == 'always' || "$ask" == 'overwrite' ]] ; then
             while true; do
                 read -p "Would you like to ${uninstall_string}? [y/n] " reply
                 case $reply in

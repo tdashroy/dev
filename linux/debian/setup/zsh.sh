@@ -246,123 +246,155 @@ zsh_shell() {
     return $ret
 }
 
+# sets
+#   restart_required - true if at least one install requires a restart to take effect.
+#                      false otherwise
 # returns
-#   0 - install requires restart
-#   1 - failed install
-#   2 - no installs requiring restart
+#   0 - all success
+#   1 - at least one failure
 install() {
-    local ret=2
+    local last=
     
     zsh_install
-
-    if [[ $? == 1 ]] ; then
+    last=$?
+    if [[ $last == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
         return 1
     fi
 
     omz_install
-
-    if [[ $? == 1 ]] ; then
+    last=$?
+    if [[ $last == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
         return 1
     fi
 
     p10k_install
-
-    if [[ $? == 1 ]] ; then
+    last=$?
+    if [[ $last == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
         return 1
     fi
 
     p10k_theme
-
-    if [[ $? == 1 ]] ; then
+    last=$?
+    if [[ $last == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
         return 1
     fi
 
     p10k_profile
-
-    if [[ $? == 1 ]] ; then
+    last=$?
+    if [[ $last == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
         return 1
-    elif [[ $? == 0 ]] ; then
-        ret=0
+    elif [[ $last == 0 ]] ; then
+        restart_required=true
     fi
 
     p10k_config
-
-    if [[ $? == 1 ]] ; then
+    last=$?
+    if [[ $last == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
         return 1
-    elif [[ $? == 0 ]] ; then
-        ret=0
+    elif [[ $last == 0 ]] ; then
+        restart_required=true
     fi
 
     zsh_profile
-
-    if [[ $? == 1 ]] ; then
+    last=$?
+    if [[ $last == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
         return 1
-    elif [[ $? == 0 ]] ; then
-        ret=0
+    elif [[ $last == 0 ]] ; then
+        restart_required=true
     fi
 
     # intentionally last, only want to use zsh if everything was set up properly
     zsh_shell
-
-    if [[ "$?" == 1 ]] ; then
+    last=$?
+    if [[ $last == 1 ]] ; then
         echo "Skipping the rest of the zsh setup."
         return 1
-    elif [[ "$?" == 0 ]] ; then
-        ret=0
+    elif [[ $last == 0 ]] ; then
+        restart_required=true
     fi
 
-    return $ret
+    return 0
 }
 
+# sets
+#   restart_required - true if at least one uninstall requires a restart to take effect.
+#                      false otherwise
 # returns
-#   0 - uninstall requires restart
-#   1 - failed uninstall
-#   2 - no uninstalls requiring restart
+#   0 - all success
+#   1 - at least one failure 
 uninstall() {
-    local ret=2
+    local last=
+    local ret=0
 
     zsh_shell
-
-    if [[ $? == 0 ]] ; then
-        ret=0
+    last=$?
+    if [[ $last == 1 ]] ; then
+        ret=1
+    elif [[ $last == 0 ]] ; then
+        restart_required=true
     fi
+    
 
     zsh_profile
-
-    if [[ $? == 0 ]] ; then
-        ret=0
+    last=$?
+    if [[ $last == 1 ]] ; then
+        ret=1
+    elif [[ $last == 0 ]] ; then
+        restart_required=true
     fi
 
     p10k_config
-
-    if [[ $? == 0 ]] ; then
-        ret=0
+    last=$?
+    if [[ $last == 1 ]] ; then
+        ret=1
+    elif [[ $last == 0 ]] ; then
+        restart_required=true
     fi
 
     p10k_profile
-
-    if [[ $? == 0 ]] ; then
-        ret=0
+    last=$?
+    if [[ $last == 1 ]] ; then
+        ret=1
+    elif [[ $last == 0 ]] ; then
+        restart_required=true
     fi
 
     p10k_theme
-
-    if [[ $? == 0 ]] ; then
-        ret=0
+    last=$?
+    if [[ $last == 1 ]] ; then
+        ret=1
+    elif [[ $last == 0 ]] ; then
+        restart_required=true
     fi
 
     p10k_install
+    last=$?
+    if [[ $last == 1 ]] ; then
+        ret=1
+    fi
+
     omz_install
+    last=$?
+    if [[ $last == 1 ]] ; then
+        ret=1
+    fi
+
     zsh_install
+    last=$?
+    if [[ $last == 1 ]] ; then
+        ret=1
+    fi
 }
 
-if eval "$g_setup_type" ; then 
+restart_required=false
+eval "g_setup_type"
+if [[ "$restart_required" == true ]] ; then 
     echo "***** NOTE: Restart shell when the script is done running *****"
 fi
