@@ -64,12 +64,12 @@ if $common_first_run ; then
             exists=true
         fi
 
-        if [[ "$ask" == 'always' || ( "$exists" = true && "$ask" = 'overwrite' ) ]] ; then
+        if [[ "$ask" == 'always' || ( "$exists" == true && "$ask" == 'overwrite' ) ]] ; then
             while true; do
                 read -p "Would you like to ${task_string}? [y/n] " reply
                 case $reply in
                     [Yy]* ) break;;
-                    [Nn]* ) return 2; break;;
+                    [Nn]* ) if [[ "$exists" == true ]] ; then return 2 ; else return 1 ; break;;
                 esac
             done
         fi
@@ -112,6 +112,10 @@ if $common_first_run ; then
         return 0
     }
 
+    # returns
+    #   0 - success
+    #   1 - fail
+    #   2 - no action
     run_setup_task() {
         local setup_type="${1}"
         local restore_file=""
@@ -133,7 +137,7 @@ if $common_first_run ; then
             run_uninstall_task "$ask" "$uninstall_string" "$exists_cmd" "$uninstall_cmd"
             return $?
         else
-            return 2
+            return 1
         fi
     }
 
