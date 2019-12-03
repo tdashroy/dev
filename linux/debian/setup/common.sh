@@ -38,7 +38,7 @@ if $common_first_run ; then
     #
     # returns
     #   0 - successful install
-    #   1 - attempted install that failed
+    #   1 - install needed, but was not successful
     #   2 - no attempted install
     run_install_task() {
         local ask="$1"
@@ -83,6 +83,10 @@ if $common_first_run ; then
         return 0
     }
 
+    # returns
+    #   0 - successful uninstall
+    #   1 - uninstall needed, but was not successful
+    #   2 - uninstall not needed
     run_uninstall_task() {
         local ask="$1"
         local uninstall_string="$2"
@@ -99,7 +103,7 @@ if $common_first_run ; then
                 read -p "Would you like to ${uninstall_string}? [y/n] " reply
                 case $reply in
                     [Yy]* ) break;;
-                    [Nn]* ) return 2; break;;
+                    [Nn]* ) return 1; break;;
                 esac
             done
         fi
