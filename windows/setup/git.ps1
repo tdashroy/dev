@@ -15,6 +15,7 @@ if ((Get-ExecutionPolicy).value__ -gt [Microsoft.PowerShell.ExecutionPolicy]::Re
     return
 }
 
+# install git-for-windows
 function git-install {    
     $setup_type = $g_setup_type
     $ask = $g_ask
@@ -24,23 +25,38 @@ function git-install {
     $install_string = "install git"
     $overwrite_string = ""
     $uninstall_string = "uninstall git"
-    $exists_cmd { Get-Command "git.exe" -ErrorAction SilentlyContinue }
-    $install_cmd {
+    function exists_cmd { Get-Command "git.exe" -ErrorAction SilentlyContinue }
+    function install_cmd {
+        # get latest download url for git-for-windows
         $git_url = "https://api.github.com/repos/git-for-windows/git/releases/latest"
         $asset = Invoke-RestMethod -Method Get -Uri $git_url | % assets | where name -like "*64-bit.exe"
+        # download installer
         $installer = "$env:temp\$($asset.name)"
         Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $installer
+        # run installer
         $install_args = "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NOCANCEL /NORESTART /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /LOADINF=""$git_dir\windows\setup\git_install.inf"""
-        Start-Process -Wait -FilePath $installer -ArgumentList $install_args 
+        Start-Process -FilePath $installer -ArgumentList $install_args -Wait
+        $ret = $?
+        # update path
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        return $ret
     }
-    $uninstall_cmd { 
+    function uninstall_cmd { 
         # https://github.com/Limech/git-powershell-silent-install/blob/master/git-silent-uninstall.ps1
-        $git_install_dir = [System.IO.Path]::GetFullPath((Join-Path (Get-Command "git.exe" -ErrorAction SilentlyContinue | % Source) "..\..")
+        $git_install_dir = [System.IO.Path]::GetFullPath((Join-Path $(Get-Command "git.exe" -ErrorAction SilentlyContinue | % Source) "..\.."))
         $uninstaller = "$git_install_dir\$(dir $git_install_dir | where Name -like "unins*.exe" | % Name)"
         $uninstall_args = "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NOCANCEL /NORESTART /FORCECLOSEAPPLICATIONS"
-        Start-Process -Wait -FilePath $uninstaller -ArgumentList $uninstall_args
-        if (Test-Path $git_install_dir) { Remove-Item -Recurse -Force $git_install_dir }
+        Start-Process -FilePath $uninstaller -ArgumentList $uninstall_args -Wait
+        $ret = $?
+        if (Test-Path $git_install_dir) { 
+            $remove_dir = Start-Process -FilePath powershell.exe -ArgumentList @("-command","Remove-Item -Path '$git_install_dir' -Recurse -Force") -Wait -PassThru -Verb RunAs
+            $ret = $remove_dir.ExitCode -eq 0
+        }
+        # update path
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        return $ret
     }
+    return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
 # standardize on LF for checkout and commit
@@ -168,15 +184,27 @@ function install {
 
     if ($ret -eq 1) {
         Write-Error "Couldn't install git, skipping the rest of the git configuration."
+        return 1
     }
 
     $ret = git-autocrlf
     $ret = git-user-name
     $ret = git-user-email
     $ret = git-keepBackup
+    
+    # $ret = posh-git-install
+    # if ($ret -eq 1) {
+    #     Write-Error "Couldn't install posh-git, skipping the rest of the powershell command line setup"
+    # }
+
+    # $ret = oh-my-posh-install
+
+    return 0
 }
 
 function uninstall {
+    # $ret = oh-my-posh-install
+    # $ret = posh-git-install
     $ret = git-keepBackup
     $ret = git-user-email
     $ret = git-user-name
@@ -184,7 +212,7 @@ function uninstall {
     $ret = git-install
 }
 
-& $g_setup_type
+$ret = & $g_setup_type
 
 # unload modules if this script loaded 
 if ($args_module -eq $null) { Remove-Module args }

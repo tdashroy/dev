@@ -65,8 +65,7 @@ Param(
     [ScriptBlock] $exists_cmd,
     [ScriptBlock] $uninstall_cmd
 )
-    & $exists_cmd
-    if ($lastexitcode -ne 0)
+    if (-not (& $exists_cmd))
     {
         Write-Host "Skipping task to $($uninstall_string)."
         return 2
@@ -87,8 +86,7 @@ Param(
     }
 
     Write-Host "Running task to $($uninstall_string)..."
-    & $uninstall_cmd
-    if ($lastexitcode -ne 0)
+    if (-not (& $uninstall_cmd))
     {
         Write-Host "Failed to $($uninstall_string)."
         return 1
