@@ -39,13 +39,13 @@ function git-install {
     }
     function uninstall_cmd { 
         # https://github.com/Limech/git-powershell-silent-install/blob/master/git-silent-uninstall.ps1
-        $git_install_dir = [System.IO.Path]::GetFullPath((Join-Path $(Get-Command "git.exe" -ErrorAction SilentlyContinue | ForEach-Object Source) "..\.."))
-        $uninstaller = "$git_install_dir\$(dir $git_install_dir | Where-Object Name -like "unins*.exe" | ForEach-Object Name)"
+        $install_dir = [System.IO.Path]::GetFullPath((Join-Path $(Get-Command "git.exe" -ErrorAction SilentlyContinue | ForEach-Object Source) "..\.."))
+        $uninstaller = "$install_dir\$(dir $install_dir | Where-Object Name -like "unins*.exe" | ForEach-Object Name)"
         $uninstall_args = "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NOCANCEL /NORESTART /FORCECLOSEAPPLICATIONS"
         Start-Process -FilePath $uninstaller -ArgumentList $uninstall_args -Wait
         $ret = $?; if (-not $ret) { return $ret }
-        if (Test-Path $git_install_dir) { 
-            $remove_dir = Start-Process -FilePath powershell.exe -ArgumentList @("-command","Remove-Item -Path '$git_install_dir' -Recurse -Force") -Wait -PassThru -Verb RunAs
+        if (Test-Path $install_dir) { 
+            $remove_dir = Start-Process -FilePath powershell.exe -ArgumentList @("-command","Remove-Item -Path '$install_dir' -Recurse -Force") -Wait -PassThru -Verb RunAs
             $ret = $remove_dir.ExitCode -eq 0; if (-not $ret) { return $ret }
         }
         # update path
