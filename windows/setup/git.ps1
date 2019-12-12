@@ -4,16 +4,9 @@ $git_dir = [System.IO.Path]::GetFullPath((Join-Path $dot "..\.."))
 # load modules
 $private:common_module = Get-Command -Module common
 Import-Module "$git_dir\windows\setup\common.psm1" -DisableNameChecking
-$private:args_module = Get-Command -Module args
-Import-Module "$git_dir\windows\setup\args.psm1" -DisableNameChecking
 
-if ((Get-ExecutionPolicy).value__ -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSigned.value__)
-{
-    Write-Host "Please set the execution policy to allow RemoteSigned scripts to be run."
-    Write-Host "To achieve this, you can run the following command from an admin PowerShell:"
-    Write-Host "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm"
-    return
-}
+# parse common args
+. "$git_dir\windows\setup\args.ps1" @args
 
 # install git-for-windows
 function git-install {    
@@ -27,30 +20,33 @@ function git-install {
     $uninstall_string = "uninstall git"
     function exists_cmd { Get-Command "git.exe" -ErrorAction SilentlyContinue }
     function install_cmd {
-        # get latest download url for git-for-windows
+        # get latest download url for git-for-windows 64-bit exe
         $git_url = "https://api.github.com/repos/git-for-windows/git/releases/latest"
-        $asset = Invoke-RestMethod -Method Get -Uri $git_url | % assets | where name -like "*64-bit.exe"
+        $asset = Invoke-RestMethod -Method Get -Uri $git_url | ForEach-Object assets | Where-Object name -like "*64-bit.exe"
+        $ret = $?; if (-not $ret) { return $ret }
         # download installer
+        $download_url = $asset.browser_download_url
         $installer = "$env:temp\$($asset.name)"
-        Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $installer
+        (New-Object System.Net.WebClient).DownloadFile($download_url, $installer)
+        $ret = $?; if (-not $ret) { return $ret }
         # run installer
         $install_args = "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NOCANCEL /NORESTART /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /LOADINF=""$git_dir\windows\setup\git_install.inf"""
         Start-Process -FilePath $installer -ArgumentList $install_args -Wait
-        $ret = $?
+        $ret = $?; if (-not $ret) { return $ret }
         # update path
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
         return $ret
     }
     function uninstall_cmd { 
         # https://github.com/Limech/git-powershell-silent-install/blob/master/git-silent-uninstall.ps1
-        $git_install_dir = [System.IO.Path]::GetFullPath((Join-Path $(Get-Command "git.exe" -ErrorAction SilentlyContinue | % Source) "..\.."))
-        $uninstaller = "$git_install_dir\$(dir $git_install_dir | where Name -like "unins*.exe" | % Name)"
+        $git_install_dir = [System.IO.Path]::GetFullPath((Join-Path $(Get-Command "git.exe" -ErrorAction SilentlyContinue | ForEach-Object Source) "..\.."))
+        $uninstaller = "$git_install_dir\$(dir $git_install_dir | Where-Object Name -like "unins*.exe" | ForEach-Object Name)"
         $uninstall_args = "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NOCANCEL /NORESTART /FORCECLOSEAPPLICATIONS"
         Start-Process -FilePath $uninstaller -ArgumentList $uninstall_args -Wait
-        $ret = $?
+        $ret = $?; if (-not $ret) { return $ret }
         if (Test-Path $git_install_dir) { 
             $remove_dir = Start-Process -FilePath powershell.exe -ArgumentList @("-command","Remove-Item -Path '$git_install_dir' -Recurse -Force") -Wait -PassThru -Verb RunAs
-            $ret = $remove_dir.ExitCode -eq 0
+            $ret = $remove_dir.ExitCode -eq 0; if (-not $ret) { return $ret }
         }
         # update path
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
@@ -192,28 +188,30 @@ function install {
     $ret = git-user-email
     $ret = git-keepBackup
     
-    # $ret = posh-git-install
-    # if ($ret -eq 1) {
-    #     Write-Error "Couldn't install posh-git, skipping the rest of the powershell command line setup"
-    # }
+    $ret = posh-git-install
+    if ($ret -eq 1) {
+        Write-Error "Couldn't install posh-git, skipping the rest of the powershell command line setup"
+        return $ret
+    }
 
-    # $ret = oh-my-posh-install
+    $ret = oh-my-posh-install
 
-    return 0
+    return $ret
 }
 
 function uninstall {
-    # $ret = oh-my-posh-install
-    # $ret = posh-git-install
+    $ret = oh-my-posh-install
+    $ret = posh-git-install
     $ret = git-keepBackup
     $ret = git-user-email
     $ret = git-user-name
     $ret = git-autocrlf
     $ret = git-install
+
+    return $ret
 }
 
 $ret = & $g_setup_type
 
 # unload modules if this script loaded 
-if ($args_module -eq $null) { Remove-Module args }
 if ($common_module -eq $null) { Remove-Module common }
