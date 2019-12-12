@@ -141,17 +141,26 @@ function posh-git-install {
 
     $setup_type = $g_setup_type
     $ask = $g_ask
-    $overwrite = $false
+    $overwrite = $g_overwrite
     $user_input = $g_user_input
     $input_required = $false
     $install_string = "install $module"
-    $overwrite_string = ""
+    $overwrite_string = "update $module"
     $uninstall_string = "uninstall $module"
     # todo: change exists_cmd to check for most recent version too
     #       change install_cmd to update to most recent version if needed
-    function exists_cmd { return Get-Module -ListAvailable -Name $module }
-    function install_cmd { PowerShellGet\Install-Module -Name $module -Scope CurrentUser -AllowClobber }
-    function uninstall_cmd { PowerShellGet\Uninstall-Module -Name $module }
+    function exists_cmd { Get-Module -ListAvailable -Name $module }
+    function install_cmd {
+        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+        PowerShellGet\Install-Module -Name $module -Scope CurrentUser -AllowClobber
+        $ret = $?
+        Set-PSRepository -Name "PSGallery" -InstallationPolicy Untrusted
+        return $ret
+    }
+    function uninstall_cmd {
+        PowerShellGet\Uninstall-Module -Name $module
+        return $?
+    }
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
@@ -161,17 +170,26 @@ function oh-my-posh-install {
 
     $setup_type = $g_setup_type
     $ask = $g_ask
-    $overwrite = $false
+    $overwrite = $g_overwrite
     $user_input = $g_user_input
     $input_required = $false
     $install_string = "install $module"
-    $overwrite_string = ""
+    $overwrite_string = "update $module"
     $uninstall_string = "uninstall $module"
     # todo: change exists_cmd to check for most recent version too
     #       change install_cmd to update to most recent version if needed
-    function exists_cmd { return Get-Module -ListAvailable -Name $module }
-    function install_cmd { PowerShellGet\Install-Module -Name $module -Scope CurrentUser -AllowClobber }
-    function uninstall_cmd { PowerShellGet\Uninstall-Module -Name $module }
+    function exists_cmd { Get-Module -ListAvailable -Name $module }
+    function install_cmd {
+        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+        PowerShellGet\Install-Module -Name $module -Scope CurrentUser -AllowClobber
+        $ret = $?
+        Set-PSRepository -Name "PSGallery" -InstallationPolicy Untrusted
+        return $ret
+    }
+    function uninstall_cmd {
+        PowerShellGet\Uninstall-Module -Name $module
+        return $?
+    }
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
