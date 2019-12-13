@@ -21,8 +21,8 @@ $private:common_module = Get-Command -Module common
 Import-Module "$git_dir\windows\setup\common.psm1" -DisableNameChecking
 . "$git_dir\windows\setup\args.ps1" @args
 
-& "$git_dir\windows\setup\font.ps1"
 & "$git_dir\windows\setup\git.ps1"
+& "$git_dir\windows\setup\font.ps1"
 & "$git_dir\windows\setup\debian.ps1"
 & "$git_dir\windows\setup\terminal.ps1"
 & "$git_dir\windows\setup\powershell.ps1"

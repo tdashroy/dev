@@ -10,11 +10,9 @@ Import-Module "$git_dir\windows\setup\common.psm1" -DisableNameChecking
 
 # install delugia nerd complete font
 function delugia-install {
-    $font_name = "Delugia Nerd Font (TrueType)"
+    $font_name = "Delugia Nerd Font"
     $font_filename = "Delugia.Nerd.Font.Complete.ttf"
     $font_git_path = "$git_dir\$font_filename"
-    $font_install_path = "$($env:LOCALAPPDATA)\Microsoft\Windows\Fonts\$font_filename"
-    $font_reg_path = "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts"
 
     $setup_type = $g_setup_type
     $ask = $g_ask
@@ -24,29 +22,33 @@ function delugia-install {
     $install_string = "install $font_name"
     $overwrite_string = ""
     $uninstall_string = "uninstall $font_name"
+    # local machine install
     function exists_cmd {
-        (Test-Path -Path $font_install_path) -and ((Get-Item -Path $font_reg_path).GetValue($font_name) -eq $font_install_path)
+        # font folder (0x14)
+        foreach ($f in (New-Object -ComObject Shell.Application).Namespace(0x14).Items()) {
+            if ($f.Name -Like "$font_name*") { 
+                return $true
+            }
+        }
+        return $false
     }
-    # local machine install, vs. user install
-    # # adapted from https://gist.github.com/anthonyeden/0088b07de8951403a643a8485af2709b and https://www.reddit.com/r/sysadmin/comments/a64lax/windows_1809_breaks_powershell_script_to_install/ebs68wj/
-    # function install_cmd {
-    #     # font folder (0x14)
-    #     $dest = (New-Object -ComObject Shell.Application).Namespace(0x14)
-    #     # FOF_SILENT (0x4) + FOF_NOCONFIRMATION (0x10)
-    #     $dest.CopyHere($font_path, 0x4 + 0x10)
-    #     New-ItemProperty -Name $font_name -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -PropertyType string -Value $
-    # }
+    # adapted from https://gist.github.com/anthonyeden/0088b07de8951403a643a8485af2709b
     function install_cmd {
-        Copy-Item -Path $font_git_path -Destination $font_install_path -Force
-        $ret = $?; if (-not $ret) { return $ret }
-        New-ItemProperty -Name $font_name -Path $font_reg_path -PropertyType string -Value $font_install_path
-        $ret = $?; return $ret
+        # font folder (0x14), FOF_SILENT (0x4) + FOF_NOCONFIRMATION (0x10)
+        (New-Object -ComObject Shell.Application).Namespace(0x14).CopyHere($font_git_path, 0x4 + 0x10)
+        if (-not (exists_cmd)) {
+            return $false
+        }
+        return $true
     }
     function uninstall_cmd {
-        Remove-Item -Path $font_install_path -Force
-        $ret = $?; if (-not $ret) { return $ret }
-        Remove-ItemProperty -Name $font_name -Path $font_reg_path -Force
-        $ret = $?; return $ret
+        Write-Host "Please open $((New-Object -ComObject Shell.Application).Namespace(0x14).Self.Path) app and remove the font $font_name."
+        Write-Host "Press any key to continue when done removing..."
+        $null = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        if (exists_cmd) {
+            return $false
+        }
+        return $true
     }
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
