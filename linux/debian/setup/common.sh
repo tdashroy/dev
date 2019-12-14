@@ -69,7 +69,7 @@ if $common_first_run ; then
                 read -p "Would you like to ${task_string}? [y/n] " reply
                 case $reply in
                     [Yy]* ) break;;
-                    [Nn]* ) if [[ "$exists" == true ]] ; then return 2 ; else return 1 ; break;;
+                    [Nn]* ) if [[ "$exists" == true ]] ; then return 2 ; else return 1 ; fi ; break;;
                 esac
             done
         fi
