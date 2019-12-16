@@ -57,6 +57,11 @@ function git-install {
 
 # standardize on LF for checkout and commit
 function git-autocrlf {
+    # if git command, no need to uninstall settings
+    if (-not (Get-Command "git.exe" -ErrorAction SilentlyContinue)) {
+        return 2
+    }
+
     $autocrlf = git config --global --get core.autocrlf
 
     $setup_type = $g_setup_type
@@ -75,6 +80,11 @@ function git-autocrlf {
 
 # set git user name
 function git-user-name {
+    # if git command, no need to uninstall settings
+    if (-not (Get-Command "git.exe" -ErrorAction SilentlyContinue)) {
+        return 2
+    }
+
     $user_name = git config --global --get user.name
 
     $setup_type = $g_setup_type
@@ -97,6 +107,11 @@ function git-user-name {
 
 # set git user email
 function git-user-email {
+    # if git command, no need to uninstall settings
+    if (-not (Get-Command "git.exe" -ErrorAction SilentlyContinue)) {
+        return 2
+    }
+
     $user_email = git config --global --get user.email
 
     $setup_type = $g_setup_type
@@ -119,6 +134,11 @@ function git-user-email {
 
 # Turn off .orig files after resolving conflicts with git mergetool
 function git-keepBackup {
+    # if git command, no need to uninstall settings
+    if (-not (Get-Command "git.exe" -ErrorAction SilentlyContinue)) {
+        return 2
+    }
+
     $keepBackup = git config --global --get mergetool.keepBackup
 
     $setup_type = $g_setup_type
