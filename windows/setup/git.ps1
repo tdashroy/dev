@@ -155,64 +155,6 @@ function git-keepBackup {
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
-# Install posh-git for nicer powershell git integration
-function posh-git-install {
-    $module = "posh-git"
-
-    $setup_type = $g_setup_type
-    $ask = $g_ask
-    $overwrite = $g_overwrite
-    $user_input = $g_user_input
-    $input_required = $false
-    $install_string = "install $module"
-    $overwrite_string = "update $module"
-    $uninstall_string = "uninstall $module"
-    # todo: change exists_cmd to check for most recent version too
-    #       change install_cmd to update to most recent version if needed
-    function exists_cmd { Get-Module -ListAvailable -Name $module }
-    function install_cmd {
-        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-        PowerShellGet\Install-Module -Name $module -Scope CurrentUser -AllowClobber
-        $ret = $?
-        Set-PSRepository -Name "PSGallery" -InstallationPolicy Untrusted
-        return $ret
-    }
-    function uninstall_cmd {
-        PowerShellGet\Uninstall-Module -Name $module
-        return $?
-    }
-    return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
-}
-
-# Install oh-my-posh for theming of the powershell prompt
-function oh-my-posh-install { 
-    $module = "oh-my-posh"
-
-    $setup_type = $g_setup_type
-    $ask = $g_ask
-    $overwrite = $g_overwrite
-    $user_input = $g_user_input
-    $input_required = $false
-    $install_string = "install $module"
-    $overwrite_string = "update $module"
-    $uninstall_string = "uninstall $module"
-    # todo: change exists_cmd to check for most recent version too
-    #       change install_cmd to update to most recent version if needed
-    function exists_cmd { Get-Module -ListAvailable -Name $module }
-    function install_cmd {
-        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-        PowerShellGet\Install-Module -Name $module -Scope CurrentUser -AllowClobber
-        $ret = $?
-        Set-PSRepository -Name "PSGallery" -InstallationPolicy Untrusted
-        return $ret
-    }
-    function uninstall_cmd {
-        PowerShellGet\Uninstall-Module -Name $module
-        return $?
-    }
-    return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
-}
-
 function install {
     $ret = git-install
 
@@ -225,21 +167,11 @@ function install {
     $ret = git-user-name
     $ret = git-user-email
     $ret = git-keepBackup
-    
-    $ret = posh-git-install
-    if ($ret -eq 1) {
-        Write-Error "Couldn't install posh-git, skipping the rest of the powershell command line setup"
-        return $ret
-    }
-
-    $ret = oh-my-posh-install
 
     return $ret
 }
 
 function uninstall {
-    $ret = oh-my-posh-install
-    $ret = posh-git-install
     $ret = git-keepBackup
     $ret = git-user-email
     $ret = git-user-name
