@@ -13,14 +13,14 @@ Param(
     [ScriptBlock] $exists_cmd,
     [ScriptBlock] $install_cmd
 )
+    $task_string = $install_string
+    $exists = $false
+
     if ($input_required -eq $true -and $user_input -eq "none")
     {
         return 2
     }
-
-    $task_string = $install_string
-    $exists = $false
-
+    
     if (& $exists_cmd)
     {
         if ($overwrite -ne $true -or ($input_required -eq $true -and $user_input -ne "all"))
@@ -39,7 +39,15 @@ Param(
             switch -Wildcard ($reply)
             {
                 "y*" { break ask_loop }
-                "n*" { if ($exists -eq $true) { return 2 } else { return 1 } }
+                "n*" {
+                    if ($exists -eq $true) {
+                        return 2
+                    } 
+                    else {
+                        Write-Host "Skipping task to $($task_string)."
+                        return 1
+                    } 
+                }
             }
         }
     }
@@ -67,7 +75,6 @@ Param(
 )
     if (-not (& $exists_cmd))
     {
-        Write-Host "Skipping task to $($uninstall_string)."
         return 2
     }
 
@@ -79,7 +86,10 @@ Param(
             switch -Wildcard ($reply)
             {
                 "y*" { break ask_loop }
-                "n*" { return 1 }
+                "n*" {
+                    Write-Host "Skipping task to $($uninstall_string)."
+                    return 1
+                }
             }
         }
 
