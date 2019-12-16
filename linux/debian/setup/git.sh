@@ -156,7 +156,7 @@ install() {
 
     git_install
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
     
     if [[ $last == 1 ]] ; then
         echo "Couldn't install git, skipping the rest of the git configuration."
@@ -165,19 +165,19 @@ install() {
 
     git_autocrlf
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
 
     git_user_name
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
 
     git_user_email
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
 
     git_credential_helper
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
     
     if [[ $ret != 1 ]] ; then
         ret=0
@@ -194,23 +194,23 @@ uninstall() {
     
     git_credential_helper
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
     
     git_user_email
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
     
     git_user_name
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
     
     git_autocrlf
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
     
     git_install
     last=$?
-    ret=$( if [[ $ret != 1]]; then ret=$last; fi )
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
     
     if [[ $ret != 1 ]] ; then
         ret=0

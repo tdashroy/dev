@@ -102,10 +102,9 @@ p10k_theme() {
     #       the setup task. in this particular case, the exists command would be checking
     #       the existence of 'ZSH_THEME=', while the skip condition would be to skip if 
     #       ZSH_THEME="powerlevel10k/powerlevel10k"
-    # exists_cmd() { [[ "$omz_theme" == 'powerlevel10k/powerlevel10k' ]]; }
-    exists_cmd() { [[ -n "$omz_theme" ]]; }
-    install_cmd() { 
-        if exists_cmd ; then
+    exists_cmd() { [[ "$omz_theme" == 'powerlevel10k/powerlevel10k' ]]; }
+    install_cmd() {
+        if [[ -n "$omz_theme" ]] ; then
             sed -i 's/\(^ZSH_THEME=\).\+$/\1"powerlevel10k\/powerlevel10k"/' "$HOME/.zshrc"
         else 
             echo 'ZSH_THEME="powerlevel10k/powerlevel10k"' >> "$HOME/.zshrc"
@@ -197,6 +196,7 @@ p10k_config() {
 # add custom zsh profile
 zsh_profile() {
     local git_zsh_profile="$git_dir/linux/debian/profile.zsh"
+    echo "git_zsh_profile: $git_zsh_profile"
     
     local setup_type="$g_setup_type"
     local ask="$g_ask"
@@ -208,7 +208,7 @@ zsh_profile() {
     local uninstall_string="stop using git repo's zsh profile"
     exists_cmd() { grep "source \"$git_zsh_profile\"" "$HOME/.zshrc" &> /dev/null; }
     install_cmd() { echo "source \"$git_zsh_profile\"" >> "$HOME/.zshrc"; }
-    uninstall_cmd() { sed -i "/source \"$git_zsh_profile\"/d" "$HOME/.zshrc"; }
+    uninstall_cmd() { sed -i "\=source \"$git_zsh_profile\"=d" "$HOME/.zshrc"; }
     run_setup_task "$setup_type" "$ask" "$overwrite" "$input" "$input_required" "$install_string" "$overwrite_string" "$uninstall_string" 'exists_cmd' 'install_cmd' 'uninstall_cmd'
     local ret=$?
 
@@ -230,7 +230,7 @@ zsh_shell() {
     local overwrite="$g_overwrite"
     local input="$g_input"
     local input_required=false
-    local install_string=
+    local install_string="change shell from $SHELL to $zsh_shell"
     local overwrite_string="change shell from $SHELL to $zsh_shell"
     local uninstall_string="change shell from $SHELL to $bash_shell"
     exists_cmd() { [[ "$SHELL" == "$zsh_shell" ]]; }
@@ -394,7 +394,7 @@ uninstall() {
 }
 
 restart_required=false
-eval "g_setup_type"
+eval "$g_setup_type"
 if [[ "$restart_required" == true ]] ; then 
     echo "***** NOTE: Restart shell when the script is done running *****"
 fi
