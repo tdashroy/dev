@@ -42,10 +42,13 @@ function terminal-install {
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
-# setup terminal profile
-function terminal-colorScheme {   
-    # todo: need to make sure we're running pwsh for this
-    return 0
+# setup terminal profile colorScheme
+function terminal-colorScheme {
+    # todo: move this into exists/install/uninstall functions
+    # powershell core 6 or greater must be available
+    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
+        return 1
+    }
     
     $setup_type = $g_setup_type
     $ask = $g_ask
@@ -55,61 +58,67 @@ function terminal-colorScheme {
     $install_string = "set Windows Terminal color scheme to One Half Dark"
     $overwrite_string = "set Windows Terminal color scheme to One Half Dark"
     $uninstall_string = "set Windows Terminal color scheme back to Campbell"
-    function exists_cmd { return $true }
+    # todo: something real
+    function exists_cmd { return ($setup_type -eq "uninstall") }
     function install_cmd {
-        $profiles_json = "C:\Users\tdash\AppData\Local\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
-        # todo: create a new profile
-        if (-Not (Test-Path $profiles_json)) {
-            return $false
-        }
-        # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        $jobj = Get-Content $profiles_json | ConvertFrom-Json
-        # change each profile's colorScheme and fontFace
-        $jobj.profiles | ForEach-Object { 
-            if ($_ -ne $null) {
-                if (Get-Member -InputObject $_ -Name colorScheme) {
-                    $_.colorScheme = "One Half Dark"
-                }
-                else {
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name "colorScheme" -Value "One Half Dark"
+        return pwsh -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) {
+                return $false
+            }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
+            # change each profile's colorScheme and fontFace
+            $jobj.profiles | ForEach-Object { 
+                if ($_ -ne $null) {
+                    if (Get-Member -InputObject $_ -Name colorScheme) {
+                        $_.colorScheme = "One Half Dark"
+                    }
+                    else {
+                        Add-Member -InputObject $_ -MemberType NoteProperty -Name "colorScheme" -Value "One Half Dark"
+                    }
                 }
             }
+            # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
+            # todo: add comments back
+            $jobj | ConvertTo-Json | Out-File $profiles_json
+            return $true
         }
-        # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
-        # todo: add comments back
-        $jobj | ConvertTo-Json | Out-File $profiles_json
     }
     function uninstall_cmd {
-        $profiles_json = "C:\Users\tdash\AppData\Local\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
-        # todo: create a new profile
-        if (-Not (Test-Path $profiles_json)) {
-            return $false
-        }
-        # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        $jobj = Get-Content $profiles_json | ConvertFrom-Json
-        # change each profile's colorScheme and fontFace
-        $jobj.profiles | ForEach-Object { 
-            if ($_ -ne $null) {
-                if (Get-Member -InputObject $_ -Name colorScheme) {
-                    $_.colorScheme = "Campbell"
-                }
-                else {
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name "colorScheme" -Value "Campbell"
+        return pwsh -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) {
+                return $false
+            }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
+            # change each profile's colorScheme and fontFace
+            $jobj.profiles | ForEach-Object { 
+                if ($_ -ne $null) {
+                    if (Get-Member -InputObject $_ -Name fontFace) {
+                        $_.PSObject.Properties.Remove("fontFace")
+                    }
                 }
             }
+            # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
+            # todo: add comments back
+            $jobj | ConvertTo-Json | Out-File $profiles_json
+            return $true
         }
-        # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
-        # todo: add comments back
-        $jobj | ConvertTo-Json | Out-File $profiles_json
-
     }
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
 # setup terminal profile
 function terminal-fontFace {  
-    # todo: need to make sure we're running pwsh for this
-    return 0
+    # todo: move this into exists/install/uninstall functions
+    # powershell core 6 or greater must be available
+    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
+        return 1
+    }
     
     $setup_type = $g_setup_type
     $ask = $g_ask
@@ -119,54 +128,57 @@ function terminal-fontFace {
     $install_string = "set Windows Terminal font to Delugia Nerd Font"
     $overwrite_string = "set Windows Terminal font to Delugia Nerd Font"
     $uninstall_string = "set Windows Terminal font back to Consolas"
-    function exists_cmd { return $true }
+    # todo: real exists command
+    function exists_cmd { return ($setup_type -eq "uninstall") }
     function install_cmd {
-        # todo: figure out how to run all these commands in pwsh
-        $profiles_json = "C:\Users\tdash\AppData\Local\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
-        # todo: create a new profile
-        if (-Not (Test-Path $profiles_json)) {
-            return $false
-        }
-        # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        $jobj = Get-Content $profiles_json | ConvertFrom-Json
-        # change each profile's colorScheme and fontFace
-        $jobj.profiles | ForEach-Object { 
-            if ($_ -ne $null) {                
-                if (Get-Member -InputObject $_ -Name fontFace) {
-                    $_.fontFace = "Delugia Nerd Font"
-                }
-                else {
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name "fontFace" -Value "Delugia Nerd Font"
+        return pwsh -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) {
+                return $false
+            }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
+            # change each profile's colorScheme and fontFace
+            $jobj.profiles | ForEach-Object { 
+                if ($_ -ne $null) {                
+                    if (Get-Member -InputObject $_ -Name fontFace) {
+                        $_.fontFace = "Delugia Nerd Font"
+                    }
+                    else {
+                        Add-Member -InputObject $_ -MemberType NoteProperty -Name "fontFace" -Value "Delugia Nerd Font"
+                    }
                 }
             }
+            # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
+            # todo: add comments back
+            $jobj | ConvertTo-Json | Out-File $profiles_json
+            return $true
         }
-        # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
-        # todo: add comments back
-        $jobj | ConvertTo-Json | Out-File $profiles_json
     }
     function uninstall_cmd {
-        $profiles_json = "C:\Users\tdash\AppData\Local\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
-        # todo: create a new profile
-        if (-Not (Test-Path $profiles_json)) {
-            return $false
-        }
-        # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        $jobj = Get-Content $profiles_json | ConvertFrom-Json
-        # change each profile's colorScheme and fontFace
-        $jobj.profiles | ForEach-Object { 
-            if ($_ -ne $null) {                
-                if (Get-Member -InputObject $_ -Name fontFace) {
-                    $_.fontFace = "Consolas"
-                }
-                else {
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name "fontFace" -Value "Consolas"
+        # todo: uninstall command if pwsh is not available
+        return pwsh -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) {
+                return $false
+            }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
+            # change each profile's colorScheme and fontFace
+            $jobj.profiles | ForEach-Object { 
+                if ($_ -ne $null) {
+                    if (Get-Member -InputObject $_ -Name fontFace) {
+                        $_.PSObject.Properties.Remove("fontFace")
+                    }
                 }
             }
+            # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
+            # todo: add comments back
+            $jobj | ConvertTo-Json | Out-File $profiles_json
+            return $true
         }
-        # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
-        # todo: add comments back
-        $jobj | ConvertTo-Json | Out-File $profiles_json
-
     }
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
