@@ -36,6 +36,7 @@ function pscore-install {
     function uninstall_cmd { 
         $package = Get-AppxPackage | Where-Object Name -Like "*powershell*"
         Remove-AppxPackage $package
+        return $?
     }
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
@@ -54,15 +55,18 @@ function pscore-profile {
     $uninstall_string = "uninstall powershell core profile"
     function exists_cmd { 
         # todo: something real
-        return $true 
+        return ($setup_type -eq "uninstall")
     }
     function install_cmd {
         # todo: back up current profile if it already exists
-        Start-Process pwsh -Verb RunAs -ArgumentList '-NoProfile', '-NoExit', '-EncodedCommand', ([Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes("'. $psprofile' | Out-File " + '$profile')))
+        Start-Process pwsh -Verb RunAs -Wait -ArgumentList '-NoProfile', '-EncodedCommand', ([Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes('New-Item -ItemType Directory -ErrorAction Ignore -Path (Split-Path $PROFILE.CurrentUserCurrentHost)')))
+        Start-Process pwsh -Verb RunAs -Wait -ArgumentList '-NoProfile', '-EncodedCommand', ([Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes("'. $psprofile' | Out-File " + '$profile.CurrentUserCurrentHost')))
+        return $?
     }
     function uninstall_cmd {
         # todo: restore previous profile
-        Start-Process pwsh -Verb RunAs -ArgumentList '-NoProfile', '-NoExit', '-EncodedCommand', ([Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes('Remove-Item $profile')))
+        Start-Process pwsh -Verb RunAs -Wait -ArgumentList '-NoProfile', '-EncodedCommand', ([Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes('Remove-Item $profile.CurrentUserCurrentHost')))
+        return $?
     }
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
@@ -74,8 +78,8 @@ function install {
 }
 
 function uninstall {
+    $ret = pscore-profile
     $ret = pscore-install
-    $ret = ps-profile
     return $ret
 }
 

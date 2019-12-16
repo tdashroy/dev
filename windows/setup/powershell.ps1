@@ -22,16 +22,18 @@ function ps-profile {
     $uninstall_string = "uninstall powershell profile"
     function exists_cmd { 
         # todo: something real
-        return $true 
+        return ($setup_type -eq "uninstall")
     }
     function install_cmd {
         # todo: back up current profile if it already exists
         ". $psprofile" | Out-File $profile.CurrentUserCurrentHost
         Write-Host "New profile installed. Please restart powershell for it to take effect."
+        return $true
     }
     function uninstall_cmd {
         # todo: restore previous profile
         Remove-Item $profile.CurrentUserCurrentHost
+        return $true
     }
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
