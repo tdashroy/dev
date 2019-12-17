@@ -27,6 +27,7 @@ Import-Module "$git_dir\windows\setup\common.psm1" -DisableNameChecking
 & "$git_dir\windows\setup\powershell.ps1"
 & "$git_dir\windows\setup\powershell_core.ps1"
 & "$git_dir\windows\setup\terminal.ps1"
+& "$git_dir\windows\setup\vscode.ps1"
 
 # unload modules if this script loaded them
 if ($common_module -eq $null) { Remove-Module common }
