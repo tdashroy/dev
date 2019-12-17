@@ -38,6 +38,71 @@ function terminal-install {
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
+# add powershell core as a shell option
+function terminal-pwsh {  
+    # todo: move this into exists/install/uninstall functions
+    # powershell core 6 or greater must be available
+    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
+        return 1
+    }
+    
+    $setup_type = $g_setup_type
+    $ask = $g_ask
+    $overwrite = $false
+    $user_input = $g_user_input
+    $input_required = $false
+    $install_string = "add PowerShell Core profile for Windows Terminal"
+    $overwrite_string = ""
+    $uninstall_string = "remove PowerShell Core profile from Windows Terminal"
+    # todo: real exists command
+    function exists_cmd { 
+        return pwsh -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) { return $false }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
+            # change each profile's colorScheme and fontFace
+            return (($jobj.profiles | Where-Object name -eq "PowerShell Core") -ne $null)
+        }
+    }
+    function install_cmd {
+        return pwsh -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) { return $false }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
+            $pscore = ($jobj.profiles | Where-Object name -eq "Windows PowerShell").PSObject.Copy()
+            if ($pscore -eq $null) { return $false }
+            $pscore.guid = "{$([guid]::NewGuid().ToString())}"
+            $pscore.name = "PowerShell Core"
+            $pscore.commandLine = "pwsh.exe"
+            $jobj.profiles += $pscore
+            # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
+            # todo: add comments back
+            $jobj | ConvertTo-Json | Out-File $profiles_json
+            return $true
+        }
+    }
+    function uninstall_cmd {
+        # todo: uninstall command if pwsh is not available
+        return pwsh -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) { return $false }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
+            $jobj.profiles = $jobj.profiles | Where-Object name -ne "PowerShell Core" | ForEach-Object { $_.PSObject.Copy() }
+            # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
+            # todo: add comments back
+            $jobj | ConvertTo-Json | Out-File $profiles_json
+            return $true
+        }
+    }
+    return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
+}
+
 # setup terminal color scheme
 function terminal-colorScheme {
     # todo: move this into exists/install/uninstall functions
@@ -48,7 +113,7 @@ function terminal-colorScheme {
     
     $setup_type = $g_setup_type
     $ask = $g_ask
-    $overwrite = $g_overwrite
+    $overwrite = $false
     $user_input = $g_user_input
     $input_required = $false
     $install_string = "set Windows Terminal color scheme to One Half Dark"
@@ -227,10 +292,6 @@ function terminal-debiandefault {
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
-
-
-
-
 function install {
     $ret = terminal-install
 
@@ -238,6 +299,7 @@ function install {
         Write-Error "Windows Terminal not installed, skipping rest of terminal setup"
     }
 
+    $ret = terminal-pwsh
     $ret = terminal-colorScheme
     $ret = terminal-fontFace
     $ret = terminal-debiandefault
@@ -249,6 +311,7 @@ function uninstall {
     $ret = terminal-debiandefault
     $ret = terminal-fontFace
     $ret = terminal-colorScheme
+    $ret = terminal-pwsh
     $ret = terminal-install
     return $ret
 }
