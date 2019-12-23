@@ -160,7 +160,7 @@ function install {
 
     if ($ret -eq 1) {
         Write-Error "Couldn't install git, skipping the rest of the git configuration."
-        return 1
+        return $ret
     }
 
     $ret = git-autocrlf
@@ -184,4 +184,4 @@ function uninstall {
 $ret = & $g_setup_type
 
 # unload modules if this script loaded 
-if ($common_module -eq $null) { Remove-Module common }
+if ($null -ne $common_module) { Remove-Module common }
