@@ -15,7 +15,10 @@ Param(
 
     [Parameter(Mandatory=$false)]
     [Alias("u")]
-    [switch] $Uninstall
+    [switch] $Uninstall,
+
+    [Parameter(Mandatory=$false, ValueFromRemainingArguments=$true)]
+    $Rest
 )
 
 if (-not $args_has_run) {
