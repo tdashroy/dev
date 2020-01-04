@@ -77,7 +77,7 @@ $private:common_module = Get-Command -Module common
 Import-Module "$git_dir\windows\setup\common.psm1" -DisableNameChecking
 . "$git_dir\windows\setup\args.ps1" @unbound_params
 
-# run git setup script before everything else, in case we need to git isn't installed yet
+# run git setup script before everything else, in case git isn't installed yet
 & "$git_dir\windows\setup\git.ps1"
 
 # if setup was run outside of the git repo dir, clone the repo into the InstallDir
