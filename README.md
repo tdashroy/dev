@@ -1,7 +1,7 @@
 # Windows setup with repo already cloned or downloaded
 
 1. Open elevated Powershell
-1. Run "windows/setup/setup.ps1"
+1. Run `windows/setup/setup.ps1`
 
 # Windows setup without repo already cloned or downloaded
 
