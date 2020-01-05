@@ -48,8 +48,8 @@ function delugia-install {
         }
         return $true
     }
-    # todo: doesn't persist across reboot for some reason (even though the file is still there). need to find a way to do this programatically
     ## local machine install
+    # todo: doesn't persist across reboot for some reason (even though the file is still there). need to find a way to do this programatically
     #function exists_cmd {
     #    # font folder (0x14)
     #    foreach ($f in (New-Object -ComObject Shell.Application).Namespace(0x14).Items()) {
@@ -93,4 +93,4 @@ function uninstall {
 $ret = & $g_setup_type
 
 # unload modules if this script loaded 
-if ($null -ne $common_module) { Remove-Module common }
+if ($null -eq $common_module) { Remove-Module common }
