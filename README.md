@@ -3,7 +3,7 @@
 ### default arguments 
 Open elevated Powershell and run `windows\setup\setup.ps1`
 
-### ask before each setup set
+### ask before each setup step
 Open elevated Powershell and run `windows\setup\setup.ps1 -a always`
 
 # Windows setup without repo already cloned or downloaded
