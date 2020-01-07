@@ -360,4 +360,4 @@ function uninstall {
 $ret = & $g_setup_type
 
 # unload modules if this script loaded 
-if ($null -ne $common_module) { Remove-Module common }
+if ($null -eq $common_module) { Remove-Module common }

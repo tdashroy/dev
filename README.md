@@ -1,15 +1,29 @@
 # Windows setup with repo already cloned or downloaded
 
-1. Open elevated Powershell
-1. Run `windows/setup/setup.ps1`
+### default arguments 
+Open elevated Powershell and run `windows\setup\setup.ps1`
+
+### ask before each setup set
+Open elevated Powershell and run `windows\setup\setup.ps1 -a always`
 
 # Windows setup without repo already cloned or downloaded
 
 ### default arguments
-`Invoke-Command -ScriptBlock ([Scriptblock]::Create((Invoke-WebRequest 'https://raw.githubusercontent.com/tdashroy/dev/master/windows/setup/setup.ps1').Content))`
+```
+Invoke-Command -ScriptBlock ([Scriptblock]::Create((Invoke-WebRequest 'https://raw.githubusercontent.com/tdashroy/dev/test/windows/setup/setup.ps1').Content))
+```
+
+### install git repo to different directory
+By default, the setup will clone the repo to `$HOME\source\repos\dev`. If you'd like to install it to another location use the `-i` parameter. 
+For example to install it to `C:\dev` instead, you'd run:
+```
+Invoke-Command -ScriptBlock ([Scriptblock]::Create((Invoke-WebRequest 'https://raw.githubusercontent.com/tdashroy/dev/test/windows/setup/setup.ps1').Content)) -ArgumentList '-i','C:\dev'
+```
 
 ### ask before each setup step
-`Invoke-Command -ScriptBlock ([Scriptblock]::Create((Invoke-WebRequest 'https://raw.githubusercontent.com/tdashroy/dev/master/windows/setup/setup.ps1').Content)) -ArgumentList "-a always"`
+```
+Invoke-Command -ScriptBlock ([Scriptblock]::Create((Invoke-WebRequest 'https://raw.githubusercontent.com/tdashroy/dev/test/windows/setup/setup.ps1').Content)) -ArgumentList '-a','always'
+```
 
 # todo
 1. Test all the windows setup scripts more carefully
