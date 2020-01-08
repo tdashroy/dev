@@ -22,15 +22,14 @@ try
 {
     
     # build parameter map for splatting later (for some reason splatting $args doesn't work when running with as a ScriptBlock with -ArgumentList)
-    # also pull out install_dir parameter for this script if it exists
+    # also pull out install_path parameter for this script if it exists
     $params = @{}
     $last = $null
-    $install_dir = "$HOME\source\repos\dev"
     for ($i = 0; $i -lt $args.Count; ++$i) {
         switch -Regex ($args[$i])
         {
-            "-i|-InstallDir|-p|-Path" { 
-                $install_dir = $args[++$i]
+            "-p|-Path" { 
+                $install_path = $args[++$i]
                 break
             }
             '^-.*' {
@@ -45,11 +44,22 @@ try
         }
     }
 
-    # check if the $install_dir\windows\setup\setup.ps1 already exists. if it does, assume our repo is already cloned there
+    # if install_path wasn't specified with a command line option, set its value
+    if (!$install_path) {
+        # not running from script, so just default to $HOME\source\repos\dev
+        if (!$MyInvocation.MyCommand.Path) {
+            $install_path = "$HOME\source\repos\dev"
+        }
+        else {
+            $install_path = [System.IO.Path]::GetFullPath((Join-Path (Split-Path $MyInvocation.MyCommand.Path) "..\.."))
+        }
+    }
+
+    # check if the $install_path\windows\setup\setup.ps1 already exists. if it does, assume our repo is already cloned there
     # todo: probably a better way to do this...
     $tmp_base_dir = $null
-    if (Test-Path "$install_dir\windows\setup\setup.ps1") {
-        $git_dir = "$install_dir"
+    if (Test-Path "$install_path\windows\setup\setup.ps1") {
+        $git_dir = "$install_path"
     }
     else {
         $tmp_base_dir = "$($env:TEMP)\dev_$(Get-Date -Format yyyyMMdd-hhmmss)"
@@ -74,26 +84,24 @@ try
     Import-Module "$git_dir\windows\setup\common.psm1" -DisableNameChecking
     . "$git_dir\windows\setup\args.ps1" @params
 
-    Write-Host "g_ask: $g_ask"
-
     # # run git setup script before everything else, in case git isn't installed yet
     & "$git_dir\windows\setup\git.ps1"
 
-    # if setup was run outside of the git repo dir, clone the repo into the $install_dir
+    # if setup was run outside of the git repo dir, clone the repo into the $install_path
     if ($null -ne $tmp_base_dir) {
-        if (-not (Test-Path "$install_dir")) {
-            New-Item -ItemType Directory -Path $install_dir
+        if (-not (Test-Path "$install_path")) {
+            New-Item -ItemType Directory -Path $install_path
         }
 
         $repo_url = "https://github.com/tdashroy/dev.git"
-        git clone "https://github.com/tdashroy/dev.git" "$install_dir"
+        git clone "https://github.com/tdashroy/dev.git" "$install_path"
         if (-not $?) { 
             Write-Error "Failed to clone $repo_url, exiting."
             return
         }
 
         # change git_dir to the directory of the newly cloned repo
-        $git_dir = "$install_dir"
+        $git_dir = "$install_path"
     }
 
     # run the rest of the setup scripts
@@ -107,11 +115,12 @@ try
 finally 
 {
     # unload modules if this script loaded them
-    if ($null -eq $common_module) { Write-Host "removing common"; Remove-Module common }
+    if ($null -eq $common_module) { 
+        Remove-Module common 
+    }
 
     # if setup was run outside of the git repo dir, clean up after ourselves
     if ($null -ne $tmp_base_dir) {
-        Write-Host "removing temp dir"
         Remove-Item $tmp_base_dir -Recurse -Force
     }
 }
