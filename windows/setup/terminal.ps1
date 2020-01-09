@@ -54,20 +54,19 @@ function terminal-pwsh {
     $install_string = "add PowerShell Core profile for Windows Terminal"
     $overwrite_string = ""
     $uninstall_string = "remove PowerShell Core profile from Windows Terminal"
-    # todo: real exists command
     function exists_cmd { 
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's colorScheme and fontFace
-            return (($jobj.profiles | Where-Object name -eq "PowerShell Core") -ne $null)
+            # check for PowerShell Core profile
+            return ($null -ne ($jobj.profiles | Where-Object name -eq "PowerShell Core"))
         }
     }
     function install_cmd {
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
@@ -87,7 +86,7 @@ function terminal-pwsh {
     }
     function uninstall_cmd {
         # todo: uninstall command if pwsh is not available
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
@@ -117,18 +116,27 @@ function terminal-colorScheme {
     $user_input = $g_user_input
     $input_required = $false
     $install_string = "set Windows Terminal color scheme to One Half Dark"
-    $overwrite_string = "set Windows Terminal color scheme to One Half Dark"
+    $overwrite_string = ""
     $uninstall_string = "set Windows Terminal color scheme back to Campbell"
-    # todo: something real
-    function exists_cmd { return ($setup_type -eq "uninstall") }
-    function install_cmd {
-        return pwsh -c {
+    function exists_cmd { 
+        return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's colorScheme and fontFace
+            # check that all profiles use color scheme "One Half Dark"
+            return ($null -eq ($jobj.profiles | Where-Object colorScheme -ne "One Half Dark"))
+        }
+    }
+    function install_cmd {
+        return pwsh -NoProfile -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) { return $false }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
+            # change each profile's colorScheme
             $jobj.profiles | ForEach-Object { 
                 if ($_ -ne $null) {
                     if (Get-Member -InputObject $_ -Name colorScheme) {
@@ -146,13 +154,13 @@ function terminal-colorScheme {
         }
     }
     function uninstall_cmd {
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's colorScheme and fontFace
+            # change each profile's colorScheme
             $jobj.profiles | ForEach-Object { 
                 if ($_ -ne $null) {
                     if (Get-Member -InputObject $_ -Name fontFace) {
@@ -185,16 +193,25 @@ function terminal-fontFace {
     $install_string = "set Windows Terminal font to Delugia Nerd Font"
     $overwrite_string = "set Windows Terminal font to Delugia Nerd Font"
     $uninstall_string = "set Windows Terminal font back to Consolas"
-    # todo: real exists command
-    function exists_cmd { return ($setup_type -eq "uninstall") }
-    function install_cmd {
-        return pwsh -c {
+    function exists_cmd { 
+        return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's colorScheme and fontFace
+            # check that all profiles use the font "Delugia Nerd Font"
+            return ($null -eq ($jobj.profiles | Where-Object fontFace -ne "Delugia Nerd Font"))
+        }
+    }
+    function install_cmd {
+        return pwsh -NoProfile -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) { return $false }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
+            # change each profile's fontFace
             $jobj.profiles | ForEach-Object { 
                 if ($_ -ne $null) {                
                     if (Get-Member -InputObject $_ -Name fontFace) {
@@ -213,13 +230,13 @@ function terminal-fontFace {
     }
     function uninstall_cmd {
         # todo: uninstall command if pwsh is not available
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's colorScheme and fontFace
+            # change each profile's fontFace
             $jobj.profiles | ForEach-Object { 
                 if ($_ -ne $null) {
                     if (Get-Member -InputObject $_ -Name fontFace) {
@@ -246,22 +263,32 @@ function terminal-debiandefault {
     
     $setup_type = $g_setup_type
     $ask = $g_ask
-    $overwrite = $g_overwrite
+    $overwrite = $false
     $user_input = $g_user_input
     $input_required = $false
     $install_string = "set default Windows Terminal profile to Debian"
-    $overwrite_string = "set default Windows Terminal profile to Debian"
+    $overwrite_string = ""
     $uninstall_string = "set default Windows Terminal profile back to Windows PowerShell"
-    # todo: real exists command
-    function exists_cmd { return ($setup_type -eq "uninstall") }
-    function install_cmd {
-        return pwsh -c {
+    function exists_cmd { 
+        return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's colorScheme and fontFace
+            $debian_guid = $jobj.profiles | Where-Object name -eq "Debian" | ForEach-Object guid
+            if ($debian_guid -eq $null) { return $false }
+            # check if the default guid is debian
+            return ($jobj.defaultProfile -eq $debian_guid)
+        }
+    }
+    function install_cmd {
+        return pwsh -NoProfile -c {
+            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
+            # todo: create a new profile
+            if (-Not (Test-Path $profiles_json)) { return $false }
+            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
+            $jobj = Get-Content $profiles_json | ConvertFrom-Json
             $debian_guid = $jobj.profiles | Where-Object name -eq "Debian" | ForEach-Object guid
             if ($debian_guid -eq $null) { return $false }
             $jobj.defaultProfile = $debian_guid
@@ -273,7 +300,7 @@ function terminal-debiandefault {
     }
     function uninstall_cmd {
         # todo: uninstall command if pwsh is not available
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
