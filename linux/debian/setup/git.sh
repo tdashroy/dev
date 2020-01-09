@@ -116,14 +116,19 @@ git_user_email() {
 }
 
 # setup wsl to use the Windows Credential Manager
-# todo: make this find the credential-helper instead
 git_credential_helper() {
+    # if we're not running under wsl, this won't exist
     if [[ -v is_wsl ]] && ! $is_wsl ; then
         return 1
     fi
 
+    # find the location of git-credential-manager.exe
+    local tgt_cred_helper="$(printf %q "$(find "$(cd "$(dirname "$(which git.exe)")/.." && pwd)" -name 'git-credential-manager.exe')")"
+    if [[ -z "$tgt_cred_helper" ]] ; then
+        return 1
+    fi
+
     local cur_cred_helper="$(git config --global --get credential.helper)"
-    local tgt_cred_helper="/mnt/c/Program\\ Files/Git/mingw64/libexec/git-core/git-credential-manager.exe"
 
     local ask="$g_ask"
     local setup_type="$g_setup_type"
@@ -133,7 +138,7 @@ git_credential_helper() {
     local install_string='set git credential helper to use Windows Credential Manager'
     local overwrite_string="overwrite git credential helper from $cur_cred_helper to $tgt_cred_helper"
     local uninstall_string='unset git credential helper from using Windows Credential Manager'
-    exists_cmd() { [[ -n "$cur_cred_helper" ]]; }
+    exists_cmd() { [[ "$tgt_cred_helper" == "$cur_cred_helper" ]]; }
     install_cmd() { git config --global credential.helper "$tgt_cred_helper"; }
     uninstall_cmd() { git config --global --unset-all credential.helper "$tgt_cred_helper"; }
     run_setup_task "$setup_type" "$ask" "$overwrite" "$input" "$input_required" "$install_string" "$overwrite_string" "$uninstall_string" 'exists_cmd' 'install_cmd' 'uninstall_cmd'

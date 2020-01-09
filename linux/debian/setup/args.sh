@@ -78,12 +78,4 @@ if $args_first_run ; then
     fi
 
     args_first_run=false
-
-    echo "Global args"
-    echo "g_ask: $g_ask"
-    echo "g_input: $g_input"
-    echo "g_overwrite: $g_overwrite"
-    echo "g_setup_type: $g_setup_type"
-    echo "g_verbose: $g_verbose"
-    echo ""
 fi
