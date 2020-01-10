@@ -66,16 +66,16 @@ if $args_first_run ; then
     [[ -z "$g_setup_type" ]] && g_setup_type='install'
     [[ -z "$g_verbose" ]] && g_verbose=false
 
-    if [[ "$g_setup_type" == 'uninstall' && ! -f "$g_restore_file" ]] ; then
-        while true; do
-            echo "Could not find restore file ${g_restore_file}."
-            read -p "Would you like to continue with default uninstall? [y/n] " reply
-            case $reply in
-                [Yy]* ) break;;
-                [Nn]* ) exit 1; break;;
-            esac
-        done
-    fi
+    # if [[ "$g_setup_type" == 'uninstall' && ! -f "$g_restore_file" ]] ; then
+    #     while true; do
+    #         echo "Could not find restore file ${g_restore_file}."
+    #         read -p "Would you like to continue with default uninstall? [y/n] " reply
+    #         case $reply in
+    #             [Yy]* ) break;;
+    #             [Nn]* ) exit 1; break;;
+    #         esac
+    #     done
+    # fi
 
     args_first_run=false
 fi

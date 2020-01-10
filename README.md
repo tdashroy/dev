@@ -42,7 +42,7 @@ Invoke-Command -ScriptBlock ([Scriptblock]::Create((New-Object System.Net.WebCli
 - `-u`: run uninstall tasks instead of install tasks.
 
 # todo
-1. Test all the windows setup scripts more carefully
+1. Add restore functionality to setup scripts
 1. Setup scripts for things that need manual setup currently
     1. Windows Terminal
         1. App install
