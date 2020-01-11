@@ -20,25 +20,12 @@ if (((Get-ExecutionPolicy).value__ -ne [Microsoft.PowerShell.ExecutionPolicy]::B
 
 try 
 {
-    
-    # build parameter map for splatting later (for some reason splatting $args doesn't work when running with as a ScriptBlock with -ArgumentList)
-    # also pull out install_path parameter for this script if it exists
-    $params = @{}
-    $last = $null
+    # need to get install path out first
     for ($i = 0; $i -lt $args.Count; ++$i) {
         switch -Regex ($args[$i])
         {
             "-p|-Path" { 
                 $install_path = $args[++$i]
-                break
-            }
-            '^-.*' {
-                $last = $args[$i] -replace '^-'
-                $params[$last] = $null
-                break
-            }
-            default {
-                $params[$last] = $args[$i]
                 break
             }
         }
@@ -82,7 +69,7 @@ try
     # load modules
     $private:common_module = Get-Command -Module common
     Import-Module "$git_dir\windows\setup\common.psm1" -DisableNameChecking
-    . "$git_dir\windows\setup\args.ps1" @params
+    . "$git_dir\windows\setup\args.ps1" @args
 
     # # run git setup script before everything else, in case git isn't installed yet
     & "$git_dir\windows\setup\git.ps1"
@@ -105,7 +92,7 @@ try
     }
 
     # run the rest of the setup scripts
-    & "$git_dir\windows\setup\debian.ps1" @params
+    & "$git_dir\windows\setup\debian.ps1"
     & "$git_dir\windows\setup\font.ps1"
     & "$git_dir\windows\setup\powershell.ps1"
     & "$git_dir\windows\setup\powershell_core.ps1"

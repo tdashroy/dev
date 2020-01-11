@@ -70,8 +70,10 @@ function debian-install {
 
 # run through debian setup tasks
 function debian-setup {
-    $setup_args = $args
-    Write-Host "setup_args: $setup_args"
+    $setup_args = ''
+    foreach ($x in $g_args.GetEnumerator()) {
+        $setup_args += "-$(if($x.Name.Length -ne 1){'-'})$($x.Name) $($x.Value)"
+    }
 
     $setup_type = $g_setup_type
     $ask = $g_ask
@@ -115,19 +117,18 @@ function install {
     }
 
     $ret = debian-install
-    $ret = debian-setup @args
+    $ret = debian-setup
     return $ret
 }
 
 function uninstall {
-    Write-Host "uninstall args: $args"
-    $ret = debian-setup @args
+    $ret = debian-setup
     $ret = debian-install
     $ret = wsl-enable
     return $ret
 }
 
-$ret = & $g_setup_type @args
+$ret = & $g_setup_type
 
 # unload modules if this script loaded 
 if ($null -eq $common_module) { Remove-Module common }

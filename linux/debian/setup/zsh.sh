@@ -196,7 +196,6 @@ p10k_config() {
 # add custom zsh profile
 zsh_profile() {
     local git_zsh_profile="$git_dir/linux/debian/profile.zsh"
-    echo "git_zsh_profile: $git_zsh_profile"
     
     local setup_type="$g_setup_type"
     local ask="$g_ask"
