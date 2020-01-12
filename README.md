@@ -10,20 +10,20 @@ Open elevated Powershell and run `windows\setup\setup.ps1 -a always`
 
 ### Default arguments
 ```
-Invoke-Command -ScriptBlock ([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/tdashroy/dev/test/windows/setup/setup.ps1')))
+Invoke-Command -ScriptBlock ([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/tdashroy/dev/master/windows/setup/setup.ps1')))
 ```
 
 ### Install git repo to different directory
 By default, the setup will clone the repo to `$HOME\source\repos\dev`. If you'd like to install it to another location use the `-i` parameter. 
 For example to install it to `C:\dev` instead, you'd run:
 ```
-Invoke-Command -ScriptBlock ([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/tdashroy/dev/test/windows/setup/setup.ps1'))) -ArgumentList '-p','C:\dev'
+Invoke-Command -ScriptBlock ([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/tdashroy/dev/master/windows/setup/setup.ps1'))) -ArgumentList '-p','C:\dev'
 ```
 
 ### Ask before each setup step
 By default, the setup won't ask before running any of the setup tasks. If you'd rather confirm each setup task with a y/n prompt, use the `-a` parameter with the `always` option. For example: 
 ```
-Invoke-Command -ScriptBlock ([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/tdashroy/dev/test/windows/setup/setup.ps1'))) -ArgumentList '-a','always'
+Invoke-Command -ScriptBlock ([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/tdashroy/dev/master/windows/setup/setup.ps1'))) -ArgumentList '-a','always'
 ```
 
 # All Command Line Options
