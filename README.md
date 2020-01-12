@@ -11,7 +11,6 @@ Open elevated Powershell and run `windows\setup\setup.ps1 -a always`
 ### Default arguments
 ```
 Invoke-Command -ScriptBlock ([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/tdashroy/dev/test/windows/setup/setup.ps1')))
-
 ```
 
 ### Install git repo to different directory
