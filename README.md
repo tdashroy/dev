@@ -1,4 +1,11 @@
-# Windows setup with repo already cloned or downloaded
+# Windows Setup
+
+All of the following must be run in an elevated Powershell. You'll also need to set Execution-Policy to Bypass. Can achieve this by running:
+```
+Set-ExecutionPolicy Bypass -Scope CurrentUser -Confirm
+```
+
+## With repo already cloned or downloaded
 
 ### Default arguments 
 Open elevated Powershell and run `windows\setup\setup.ps1`
@@ -6,7 +13,7 @@ Open elevated Powershell and run `windows\setup\setup.ps1`
 ### Ask before each setup step
 Open elevated Powershell and run `windows\setup\setup.ps1 -a always`
 
-# Windows setup without repo already cloned or downloaded
+## Without repo already cloned or downloaded
 
 ### Default arguments
 ```
