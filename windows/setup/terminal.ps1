@@ -21,10 +21,16 @@ function terminal-install {
     function exists_cmd { Get-Command "wt.exe" -ErrorAction SilentlyContinue }
     function install_cmd {
         # todo: figure out a way to install
-        Write-Host "Please open the Microsoft Store and install the Windows Terminal (Preview)."
-        Write-Host "Press any key to continue when done installing..."
+        Write-Host "Please open the Microsoft Store and install Windows Terminal (Preview)."
+        Write-Host "Press any key to open the Microsoft Store..."
+        $null = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        Start-Process "ms-windows-store:"
+        Write-Host "Press any key when you're done installing..."
         $null = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         if (-not (exists_cmd)) { return $false }
+        $p = Start-Process "wt.exe" -PassThru
+        Start-Sleep -Seconds 5
+        Stop-Process $p
         return $true
     }
     function uninstall_cmd {
