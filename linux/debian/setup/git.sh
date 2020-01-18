@@ -30,24 +30,25 @@ git_install() {
 
 # set git to convert CRLF line endings to LF on commit
 git_autocrlf() {
-    local autocrlf="$(git config --global --get core.autocrlf)"
+    local cur_autocrlf="$(git config --global --get core.autocrlf)"
+    local new_autocrlf='input'
 
     local setup_type="$g_setup_type"
     local ask="$g_ask"
     local overwrite="$g_overwrite"
     local input="$g_input"
     local input_required=false
-    local install_string='set git autocrlf to input'
-    local overwrite_string="overwrite git autocrlf from $autocrlf to input"
-    local uninstall_string="unset git autocrlf from input"
+    local install_string="set git autocrlf to $new_autocrlf"
+    local overwrite_string="overwrite git autocrlf from $cur_autocrlf to $new_autocrlf"
+    local uninstall_string="unset git autocrlf from $new_autocrlf"
     # todo: maybe split exists_cmd into two commands: one for install and one for uninstall. 
     #       this way for install we can just check to see if we're overwriting, but for uninstall 
     #       we can check to see if the specific command was set.
     #       will probably end up with something similar/better than this once restore functionality 
     #       is addded, so gonna postpone for now
-    exists_cmd() { [[ -n "$autocrlf" ]]; }
-    install_cmd() { git config --global core.autocrlf input; }
-    uninstall_cmd() { git config --global --unset-all core.autocrlf input; }
+    exists_cmd() { [[ "$cur_autocrlf" == "$new_autocrlf" ]]; }
+    install_cmd() { git config --global core.autocrlf "$new_autocrlf"; }
+    uninstall_cmd() { git config --global --unset-all core.autocrlf "$new_autocrlf"; }
     run_setup_task "$setup_type" "$ask" "$overwrite" "$input" "$input_required" "$install_string" "$overwrite_string" "$uninstall_string" 'exists_cmd' 'install_cmd' 'uninstall_cmd'
     local ret=$?
 
@@ -56,6 +57,36 @@ git_autocrlf() {
     unset -f uninstall_cmd
 
     return $ret
+}
+
+# explicitly set git pager to the git defaults when the LESS environment variable isn't set, "less -FRX"
+# when the LESS environment variable is set, git uses whatever it's set to instead of FRX
+git_pager() {
+    local cur_pager="$(git config --global --get core.pager)"
+    local new_pager='less -FRX'
+
+    local setup_type="$g_setup_type"
+    local ask="$g_ask"
+    local overwrite="$g_overwrite"
+    local input="$g_input"
+    local input_required=false
+    local install_string="set git pager to $new_pager"
+    local overwrite_string="overwrite git pager from $cur_pager to $new_pager"
+    local uninstall_string="unset git pager from $new_pager"
+    exists_cmd() { [[ $cur_pager == $new_pager ]]; }
+    install_cmd() { 
+        git config --global core.pager "$new_pager"
+    }
+    uninstall_cmd() { git config --global --unset-all core.pager "$new_pager"; }
+    run_setup_task "$setup_type" "$ask" "$overwrite" "$input" "$input_required" "$install_string" "$overwrite_string" "$uninstall_string" 'exists_cmd' 'install_cmd' 'uninstall_cmd'
+    local ret=$?
+
+    unset -f exists_cmd
+    unset -f install_cmd
+    unset -f uninstall_cmd
+
+    return $ret
+
 }
 
 # set git user name
@@ -172,6 +203,10 @@ install() {
     last=$?
     if [[ $ret != 1 ]] ; then ret=$last ; fi
 
+    git_pager
+    last=$?
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
+
     git_user_name
     last=$?
     if [[ $ret != 1 ]] ; then ret=$last ; fi
@@ -206,6 +241,10 @@ uninstall() {
     if [[ $ret != 1 ]] ; then ret=$last ; fi
     
     git_user_name
+    last=$?
+    if [[ $ret != 1 ]] ; then ret=$last ; fi
+    
+    git_pager
     last=$?
     if [[ $ret != 1 ]] ; then ret=$last ; fi
     
