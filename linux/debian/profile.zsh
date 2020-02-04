@@ -6,3 +6,5 @@ eval "$(dircolors "$git_dir/linux/debian/dircolors")"
 
 # make tab completion colors the same as dircolors
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+
+export path=("$HOME/bin" $path)
