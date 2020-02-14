@@ -44,70 +44,6 @@ function terminal-install {
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
-# add powershell core as a shell option
-function terminal-pwsh {  
-    # todo: move this into exists/install/uninstall functions
-    # powershell core 6 or greater must be available
-    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
-        return 1
-    }
-    
-    $setup_type = $g_setup_type
-    $ask = $g_ask
-    $overwrite = $false
-    $user_input = $g_user_input
-    $input_required = $false
-    $install_string = "add PowerShell Core profile for Windows Terminal"
-    $overwrite_string = ""
-    $uninstall_string = "remove PowerShell Core profile from Windows Terminal"
-    function exists_cmd { 
-        return pwsh -NoProfile -c {
-            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
-            # todo: create a new profile
-            if (-Not (Test-Path $profiles_json)) { return $false }
-            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-            $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # check for PowerShell Core profile
-            return ($null -ne ($jobj.profiles | Where-Object name -eq "PowerShell Core"))
-        }
-    }
-    function install_cmd {
-        return pwsh -NoProfile -c {
-            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
-            # todo: create a new profile
-            if (-Not (Test-Path $profiles_json)) { return $false }
-            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-            $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            $pscore = ($jobj.profiles | Where-Object name -eq "Windows PowerShell").PSObject.Copy()
-            if ($pscore -eq $null) { return $false }
-            $pscore.guid = "{$([guid]::NewGuid().ToString())}"
-            $pscore.name = "PowerShell Core"
-            $pscore.commandLine = "pwsh.exe"
-            $jobj.profiles += $pscore
-            # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
-            # todo: add comments back
-            $jobj | ConvertTo-Json | Out-File $profiles_json
-            return $true
-        }
-    }
-    function uninstall_cmd {
-        # todo: uninstall command if pwsh is not available
-        return pwsh -NoProfile -c {
-            $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
-            # todo: create a new profile
-            if (-Not (Test-Path $profiles_json)) { return $false }
-            # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-            $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            $jobj.profiles = $jobj.profiles | Where-Object name -ne "PowerShell Core" | ForEach-Object { $_.PSObject.Copy() }
-            # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
-            # todo: add comments back
-            $jobj | ConvertTo-Json | Out-File $profiles_json
-            return $true
-        }
-    }
-    return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
-}
-
 # setup terminal color scheme
 function terminal-colorScheme {
     # todo: move this into exists/install/uninstall functions
@@ -131,8 +67,8 @@ function terminal-colorScheme {
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # check that all profiles use color scheme "One Half Dark"
-            return ($null -eq ($jobj.profiles | Where-Object colorScheme -ne "One Half Dark"))
+            # check that the default color scheme is set to "One Half Dark"
+            return ($jobj.profiles.defaults.colorScheme -eq "One Half Dark")
         }
     }
     function install_cmd {
@@ -142,20 +78,17 @@ function terminal-colorScheme {
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's colorScheme
-            $jobj.profiles | ForEach-Object { 
-                if ($_ -ne $null) {
-                    if (Get-Member -InputObject $_ -Name colorScheme) {
-                        $_.colorScheme = "One Half Dark"
-                    }
-                    else {
-                        Add-Member -InputObject $_ -MemberType NoteProperty -Name "colorScheme" -Value "One Half Dark"
-                    }
-                }
+            if ($jobj.profiles.defaults.colorScheme) {
+                # change default colorScheme
+                $jobj.profiles.defaults.colorScheme = "One Half Dark"
+            }
+            else {
+                # add default colorScheme
+                Add-Member -InputObject $jobj.profiles.defaults -MemberType NoteProperty -Name "colorScheme" -Value "One Half Dark"
             }
             # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
             # todo: add comments back
-            $jobj | ConvertTo-Json | Out-File $profiles_json
+            $jobj | ConvertTo-Json -Depth 5 | Out-File $profiles_json
             return $true
         }
     }
@@ -166,17 +99,11 @@ function terminal-colorScheme {
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's colorScheme
-            $jobj.profiles | ForEach-Object { 
-                if ($_ -ne $null) {
-                    if (Get-Member -InputObject $_ -Name fontFace) {
-                        $_.PSObject.Properties.Remove("fontFace")
-                    }
-                }
-            }
+            # remove default colorScheme
+            $jobj.profiles.defaults.PSObject.Properties.Remove("colorScheme")
             # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
             # todo: add comments back
-            $jobj | ConvertTo-Json | Out-File $profiles_json
+            $jobj | ConvertTo-Json -Depth 5 | Out-File $profiles_json
             return $true
         }
     }
@@ -207,7 +134,7 @@ function terminal-fontFace {
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
             # check that all profiles use the font "Delugia Nerd Font"
-            return ($null -eq ($jobj.profiles | Where-Object fontFace -ne "Delugia Nerd Font"))
+            return ($jobj.profiles.defaults.fontFace -eq "Delugia Nerd Font")
         }
     }
     function install_cmd {
@@ -217,42 +144,32 @@ function terminal-fontFace {
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's fontFace
-            $jobj.profiles | ForEach-Object { 
-                if ($_ -ne $null) {                
-                    if (Get-Member -InputObject $_ -Name fontFace) {
-                        $_.fontFace = "Delugia Nerd Font"
-                    }
-                    else {
-                        Add-Member -InputObject $_ -MemberType NoteProperty -Name "fontFace" -Value "Delugia Nerd Font"
-                    }
-                }
+            if ($jobj.profiles.defaults.fontFace) {
+                # change default fontFace
+                $jobj.profiles.defaults.fontFace = "Delugia Nerd Font"
+            }
+            else {
+                # add default fontFace
+                Add-Member -InputObject $jobj.profiles.defaults -MemberType NoteProperty -Name "fontFace" -Value "Delugia Nerd Font"
             }
             # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
             # todo: add comments back
-            $jobj | ConvertTo-Json | Out-File $profiles_json
+            $jobj | ConvertTo-Json -Depth 5 | Out-File $profiles_json
             return $true
         }
     }
     function uninstall_cmd {
-        # todo: uninstall command if pwsh is not available
         return pwsh -NoProfile -c {
             $profiles_json = "$($env:LOCALAPPDATA)\Packages\$(Get-AppxPackage | Where-Object Name -Like "*WindowsTerminal*" | ForEach-Object PackageFamilyName)\LocalState\profiles.json"
             # todo: create a new profile
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            # change each profile's fontFace
-            $jobj.profiles | ForEach-Object { 
-                if ($_ -ne $null) {
-                    if (Get-Member -InputObject $_ -Name fontFace) {
-                        $_.PSObject.Properties.Remove("fontFace")
-                    }
-                }
-            }
+            # remove default fontFace
+            $jobj.profiles.defaults.PSObject.Properties.Remove("fontFace")
             # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
             # todo: add comments back
-            $jobj | ConvertTo-Json | Out-File $profiles_json
+            $jobj | ConvertTo-Json -Depth 5 | Out-File $profiles_json
             return $true
         }
     }
@@ -282,7 +199,7 @@ function terminal-debiandefault {
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            $debian_guid = $jobj.profiles | Where-Object name -eq "Debian" | ForEach-Object guid
+            $debian_guid = $jobj.profiles.list | Where-Object name -eq "Debian" | ForEach-Object guid
             if ($debian_guid -eq $null) { return $false }
             # check if the default guid is debian
             return ($jobj.defaultProfile -eq $debian_guid)
@@ -295,12 +212,12 @@ function terminal-debiandefault {
             if (-Not (Test-Path $profiles_json)) { return $false }
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
-            $debian_guid = $jobj.profiles | Where-Object name -eq "Debian" | ForEach-Object guid
+            $debian_guid = $jobj.profiles.list | Where-Object name -eq "Debian" | ForEach-Object guid
             if ($debian_guid -eq $null) { return $false }
             $jobj.defaultProfile = $debian_guid
             # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
             # todo: add comments back
-            $jobj | ConvertTo-Json | Out-File $profiles_json
+            $jobj | ConvertTo-Json -Depth 5 | Out-File $profiles_json
             return $true
         }
     }
@@ -313,12 +230,12 @@ function terminal-debiandefault {
             # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
             $jobj = Get-Content $profiles_json | ConvertFrom-Json
             # change each profile's colorScheme and fontFace
-            $ps_guid = $jobj.profiles | Where-Object name -eq "Windows PowerShell" | ForEach-Object guid
+            $ps_guid = $jobj.profiles.list | Where-Object name -eq "Windows PowerShell" | ForEach-Object guid
             if ($ps_guid -eq $null) { return $false }
             $jobj.defaultProfile = $ps_guid
             # convert back to json and write to file. we lose the comments, but not sure how to easily handle that
             # todo: add comments back
-            $jobj | ConvertTo-Json | Out-File $profiles_json
+            $jobj | ConvertTo-Json -Depth 5 | Out-File $profiles_json
             return $true
         }
     }
