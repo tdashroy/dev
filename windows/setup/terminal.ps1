@@ -249,7 +249,6 @@ function install {
         Write-Error "Windows Terminal not installed, skipping rest of terminal setup"
     }
 
-    $ret = terminal-pwsh
     $ret = terminal-colorScheme
     $ret = terminal-fontFace
     $ret = terminal-debiandefault
@@ -261,7 +260,6 @@ function uninstall {
     $ret = terminal-debiandefault
     $ret = terminal-fontFace
     $ret = terminal-colorScheme
-    $ret = terminal-pwsh
     $ret = terminal-install
     return $ret
 }
