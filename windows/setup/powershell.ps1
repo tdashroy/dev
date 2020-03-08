@@ -26,7 +26,7 @@ function ps-profile {
     }
     function install_cmd {
         # todo: back up current profile if it already exists
-        ". $psprofile" | Out-File $profile.CurrentUserCurrentHost
+        ". '$psprofile'" | Out-File $profile.CurrentUserCurrentHost
         Write-Host "New profile installed. Please restart powershell for it to take effect."
         return $true
     }
