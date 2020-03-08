@@ -48,7 +48,7 @@ function terminal-install {
 function terminal-colorScheme {
     # todo: move this into exists/install/uninstall functions
     # powershell core 6 or greater must be available
-    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
+    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -NoProfile -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
         return 1
     }
     
@@ -114,7 +114,7 @@ function terminal-colorScheme {
 function terminal-fontFace {  
     # todo: move this into exists/install/uninstall functions
     # powershell core 6 or greater must be available
-    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
+    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -NoProfile -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
         return 1
     }
     
@@ -180,7 +180,7 @@ function terminal-fontFace {
 function terminal-debiandefault {  
     # todo: move this into exists/install/uninstall functions
     # powershell core 6 or greater must be available
-    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
+    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -NoProfile -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
         return 1
     }
     
