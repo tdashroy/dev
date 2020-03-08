@@ -22,7 +22,7 @@ function pscore-install {
     function install_cmd {
         # get latest download url for powershell core 64-bit exe
         $git_url = "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
-        $asset = Invoke-RestMethod -Method Get -Uri $git_url | ForEach-Object assets | Where-Object name -like "*win-x64.msix"
+        $asset = Invoke-RestMethod -Method Get -Uri $git_url | ForEach-Object assets | Where-Object name -like "*win-x64.msi"
         $ret = $?; if (-not $ret) { return $ret }
         # download installer
         $download_url = $asset.browser_download_url
