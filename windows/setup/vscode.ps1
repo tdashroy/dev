@@ -123,7 +123,7 @@ function vscode-ext-one-dark-pro {
 function vscode-setting-one-dark-pro {   
     # todo: move this into exists/install/uninstall functions
     # powershell core 6 or greater must be available
-    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
+    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -NoProfile -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
         return 1
     }
     
@@ -137,14 +137,14 @@ function vscode-setting-one-dark-pro {
     $uninstall_string = "set Visual Studio Code color theme back to default"
     function exists_cmd {
         # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $settings_json = "$($env:APPDATA)\Code\User\settings.json"
             return ((Test-Path $settings_json) -and ((Get-Content $settings_json | ConvertFrom-Json)."workbench.colorTheme" -eq "One Dark Pro"))
         }
     }
     function install_cmd {
         # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $settings_json = "$($env:APPDATA)\Code\User\settings.json"
     
             if (Test-Path $settings_json) {
@@ -167,7 +167,7 @@ function vscode-setting-one-dark-pro {
     }
     function uninstall_cmd {
         # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $settings_json = "$($env:APPDATA)\Code\User\settings.json"
     
             if (-Not (Test-Path $settings_json)) {
@@ -191,7 +191,7 @@ function vscode-setting-one-dark-pro {
 function vscode-setting-fontFamily {   
     # todo: move this into exists/install/uninstall functions
     # powershell core 6 or greater must be available
-    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
+    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -NoProfile -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
         return 1
     }
     
@@ -205,14 +205,14 @@ function vscode-setting-fontFamily {
     $uninstall_string = "set Visual Studio Code font back to default"
     function exists_cmd {
         # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $settings_json = "$($env:APPDATA)\Code\User\settings.json"
             return ((Test-Path $settings_json) -and ((Get-Content $settings_json | ConvertFrom-Json)."editor.fontFamily" -like "*'Delugia Nerd Font',*"))
         }
     }
     function install_cmd {
         # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $settings_json = "$($env:APPDATA)\Code\User\settings.json"
     
             if (Test-Path $settings_json) {
@@ -235,7 +235,7 @@ function vscode-setting-fontFamily {
     }
     function uninstall_cmd {
         # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $settings_json = "$($env:APPDATA)\Code\User\settings.json"
     
             if (-Not (Test-Path $settings_json)) {
@@ -259,7 +259,7 @@ function vscode-setting-fontFamily {
 function vscode-setting-fontLigatures {   
     # todo: move this into exists/install/uninstall functions
     # powershell core 6 or greater must be available
-    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
+    if (-not (Get-Command "pwsh.exe" -ErrorAction SilentlyContinue) -or (pwsh -NoProfile -c {$PSVersionTable.PSVersion.Major}) -lt 6) {
         return 1
     }
     
@@ -273,14 +273,14 @@ function vscode-setting-fontLigatures {
     $uninstall_string = "set Visual Studio Code font ligatures back to default"
     function exists_cmd {
         # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $settings_json = "$($env:APPDATA)\Code\User\settings.json"
             return ((Test-Path $settings_json) -and (((Get-Content $settings_json | ConvertFrom-Json)."editor.fontLigatures") -eq $false))
         }
     }
     function install_cmd {
         # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $settings_json = "$($env:APPDATA)\Code\User\settings.json"
     
             if (Test-Path $settings_json) {
@@ -303,7 +303,7 @@ function vscode-setting-fontLigatures {
     }
     function uninstall_cmd {
         # parse json (requires PowerShell Core 6.0 or later to parse comments in the file)
-        return pwsh -c {
+        return pwsh -NoProfile -c {
             $settings_json = "$($env:APPDATA)\Code\User\settings.json"
     
             if (-Not (Test-Path $settings_json)) {
