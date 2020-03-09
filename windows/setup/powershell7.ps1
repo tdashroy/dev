@@ -130,9 +130,11 @@ function ps7-profile {
     $install_string = "install powershell 7 profile"
     $overwrite_string = ""
     $uninstall_string = "uninstall powershell 7 profile"
-    function exists_cmd { 
-        # todo: something real
-        return ($setup_type -eq "uninstall")
+    function exists_cmd {
+        $command = '(Get-Content $profile.CurrentUserCurrentHost) -eq ' + "'. ''$psprofile'''"
+        $bytes = [Text.Encoding]::Unicode.GetBytes($command)
+        $encodedCommand = [Convert]::ToBase64String($bytes)
+        return pwsh -NoProfile -EncodedCommand $encodedCommand
     }
     function install_cmd {
         # todo: back up current profile if it already exists
@@ -146,8 +148,7 @@ function ps7-profile {
         $command = "'. ''$psprofile''' | Out-File " + '$profile.CurrentUserCurrentHost'
         $bytes = [Text.Encoding]::Unicode.GetBytes($command)
         $encodedCommand = [Convert]::ToBase64String($bytes)
-        pwsh -NoProfile -EncodedCommand $encodedCommand
-        return $?
+        return pwsh -NoProfile -EncodedCommand $encodedCommand
     }
     function uninstall_cmd {
         # todo: restore previous profile

@@ -20,10 +20,7 @@ function ps-profile {
     $install_string = "install powershell profile"
     $overwrite_string = ""
     $uninstall_string = "uninstall powershell profile"
-    function exists_cmd { 
-        # todo: something real
-        return ($setup_type -eq "uninstall")
-    }
+    function exists_cmd { (Get-Content $profile.CurrentUserCurrentHost) -eq ". '$psprofile'" }
     function install_cmd {
         # todo: back up current profile if it already exists
         ". '$psprofile'" | Out-File $profile.CurrentUserCurrentHost
