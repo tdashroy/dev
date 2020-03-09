@@ -95,7 +95,7 @@ try
     & "$git_dir\windows\setup\debian.ps1"
     & "$git_dir\windows\setup\font.ps1"
     & "$git_dir\windows\setup\powershell.ps1"
-    & "$git_dir\windows\setup\powershell_core.ps1"
+    & "$git_dir\windows\setup\powershell7.ps1"
     & "$git_dir\windows\setup\terminal.ps1"
     & "$git_dir\windows\setup\vscode.ps1"
 }

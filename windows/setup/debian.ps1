@@ -89,13 +89,13 @@ function debian-setup {
     }
     function install_cmd {
         $debian_setup_script = wsl wslpath -a "$git_dir\linux\debian\setup\setup.sh".Replace("\", "\\")
-        $debian_setup_cmd = "$debian_setup_script $setup_args"
+        $debian_setup_cmd = "'$debian_setup_script' $setup_args"
         Start-Process -FilePath "debian.exe" -ArgumentList "-c $debian_setup_cmd" -Wait -NoNewWindow
         return $?
     }
     function uninstall_cmd {
         $debian_setup_script = wsl wslpath -a "$git_dir\linux\debian\setup\setup.sh".Replace("\", "\\")
-        $debian_setup_cmd = "$debian_setup_script $setup_args"
+        $debian_setup_cmd = "'$debian_setup_script' $setup_args"
         Start-Process -FilePath "debian.exe" -ArgumentList "-c $debian_setup_cmd" -Wait -NoNewWindow
         return $?        
     }
