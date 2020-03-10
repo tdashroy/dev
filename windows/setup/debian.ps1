@@ -35,7 +35,42 @@ function wsl-enable {
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
 
-# install git-for-windows
+# until the issue at https://github.com/MicrosoftDocs/WSL/issues/563 is fixed, need to install from the store manually
+#
+# install debian
+# function debian-install {    
+#     $setup_type = $g_setup_type
+#     $ask = $g_ask
+#     $overwrite = $false
+#     $user_input = $g_user_input
+#     $input_required = $false
+#     $install_string = "install debian windows subsystem for linux"
+#     $overwrite_string = ""
+#     $uninstall_string = "uninstall debian windows subsystem for linux"
+#     function exists_cmd { Get-Command "debian.exe" -ErrorAction SilentlyContinue }
+#     function install_cmd {        
+#         # download appx package
+#         $download_url = "https://aka.ms/wsl-debian-gnulinux"
+#         $package = "$env:temp\debian.appx"
+#         (New-Object System.Net.WebClient).DownloadFile($download_url, $package)
+#         $ret = $?; if (-not $ret) { return $ret }
+#         # install appx package
+#         Add-AppxPackage $package
+#         $ret = $?; if (-not $ret) { return $ret }
+#         # initialize
+#         Start-Process -FilePath "debian.exe" -ArgumentList "install" -Wait -NoNewWindow
+#         $ret = $?; if (-not $ret) { return $ret }
+#         Start-Process -FilePath "debian.exe" -ArgumentList "-c sudo apt-get update && sudo apt-get -y upgrade" -Wait -NoNewWindow
+#     }
+#     function uninstall_cmd { 
+#         $package = Get-AppxPackage | Where-Object Name -Like "*debian*"
+#         Remove-AppxPackage $package   
+#         return $?     
+#     }
+#     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
+# }
+
+# install debian
 function debian-install {    
     $setup_type = $g_setup_type
     $ask = $g_ask
@@ -46,27 +81,28 @@ function debian-install {
     $overwrite_string = ""
     $uninstall_string = "uninstall debian windows subsystem for linux"
     function exists_cmd { Get-Command "debian.exe" -ErrorAction SilentlyContinue }
-    function install_cmd {        
-        # download appx package
-        $download_url = "https://aka.ms/wsl-debian-gnulinux"
-        $package = "$env:temp\debian.appx"
-        (New-Object System.Net.WebClient).DownloadFile($download_url, $package)
-        $ret = $?; if (-not $ret) { return $ret }
-        # install appx package
-        Add-AppxPackage $package
-        $ret = $?; if (-not $ret) { return $ret }
-        # initialize
-        Start-Process -FilePath "debian.exe" -ArgumentList "install" -Wait -NoNewWindow
-        $ret = $?; if (-not $ret) { return $ret }
-        Start-Process -FilePath "debian.exe" -ArgumentList "-c sudo apt-get update && sudo apt-get -y upgrade" -Wait -NoNewWindow
+    function install_cmd {
+        # todo: figure out a way to install
+        Write-Host "Please open the Microsoft Store and install Debian."
+        Write-Host "Press any key to open the Microsoft Store..."
+        $null = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        Start-Process "ms-windows-store:"
+        Write-Host "Press any key when you're done installing..."
+        $null = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        if (-not (exists_cmd)) { return $false }
+        return $true
     }
-    function uninstall_cmd { 
-        $package = Get-AppxPackage | Where-Object Name -Like "*debian*"
-        Remove-AppxPackage $package   
-        return $?     
+    function uninstall_cmd {
+        # todo: figure out a way to uninstall
+        Write-Host "Please open Settings remove Debian."
+        Write-Host "Press any key to continue when done uninstalling..."
+        $null = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        if (exists_cmd) { return $false }
+        return $true
     }
     return Run-Setup-Task $setup_type $ask $overwrite $user_input $input_required $install_string $overwrite_string $uninstall_string { exists_cmd } { install_cmd } { uninstall_cmd }
 }
+
 
 # run through debian setup tasks
 function debian-setup {
