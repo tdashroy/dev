@@ -31,7 +31,7 @@ if (Get-Module -ListAvailable -Name "oh-my-posh")
 }
 
 # Local powershell profile, for machine specific settings
-$lprofile = "$git_dir\windows\powershell\lprofile.ps1"
+$lprofile = "$home\.lprofile.ps1"
 if (Test-Path $lprofile)
 {
     . $lprofile
