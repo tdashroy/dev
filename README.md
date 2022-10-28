@@ -56,3 +56,4 @@ Invoke-Command -ScriptBlock ([Scriptblock]::Create((New-Object System.Net.WebCli
         1. Update install script to use new install run-setup-task functions
         1. Mess with vimrc
 1. Modify oh-my-posh and oh-my-zsh/powerlevel10k prompts to match exactly
+1. Multiple gitconfigs
